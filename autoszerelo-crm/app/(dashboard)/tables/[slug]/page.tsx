@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { TableGrid } from "@/components/tables/table-grid";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 export default async function TableDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -17,6 +18,7 @@ export default async function TableDetailPage({ params }: { params: Promise<{ sl
 
   return (
     <div className="flex flex-col gap-6">
+      <Breadcrumbs items={[{ label: "Egyedi táblák", href: "/tables" }, { label: table.name }]} />
       <div>
         <h1 className="text-2xl font-semibold text-foreground">{table.name}</h1>
         {table.description && <p className="text-sm text-muted-foreground">{table.description}</p>}

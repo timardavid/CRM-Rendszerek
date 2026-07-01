@@ -11,6 +11,7 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { CustomerFormDialog, type CustomerFormValues } from "@/components/customers/customer-form-dialog";
 import { VehicleFormDialog, type VehicleFormValues } from "@/components/customers/vehicle-form-dialog";
 import { STATUS_LABELS } from "@/lib/work-order";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 export type CustomerDetailData = {
   id: string;
@@ -106,6 +107,7 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
 
   return (
     <div className="flex flex-col gap-6">
+      <Breadcrumbs items={[{ label: "Ügyfelek", href: "/customers" }, { label: customer.name }]} />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">{customer.name}</h1>

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ItemEditor, type ItemDraft, EMPTY_ITEM } from "@/components/work-orders/item-editor";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 type CustomerOption = {
   id: string;
@@ -75,6 +76,7 @@ export function WorkOrderForm({
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
+      <Breadcrumbs items={[{ label: "Munkalapok", href: "/work-orders" }, { label: "Új munkalap" }]} />
       <h1 className="text-2xl font-semibold text-foreground">Új munkalap</h1>
       <Card>
         <CardHeader>

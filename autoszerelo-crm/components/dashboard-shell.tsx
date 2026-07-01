@@ -1,20 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
-import { SidebarNav } from "@/components/sidebar-nav";
+import Link from "next/link";
+import { Menu, X, Plus } from "lucide-react";
+import { SidebarNav, type NavCounts } from "@/components/sidebar-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LogoutButton } from "@/components/logout-button";
+import { GlobalSearch } from "@/components/global-search";
 import { Button } from "@/components/ui/button";
 
 type Props = {
   companyName: string;
   userName: string;
   userRole: string;
+  navCounts: NavCounts;
   children: React.ReactNode;
 };
 
-export function DashboardShell({ companyName, userName, userRole, children }: Props) {
+export function DashboardShell({ companyName, userName, userRole, navCounts, children }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -23,7 +26,7 @@ export function DashboardShell({ companyName, userName, userRole, children }: Pr
         <div className="border-b border-border p-4">
           <p className="truncate font-semibold text-foreground">{companyName}</p>
         </div>
-        <SidebarNav />
+        <SidebarNav counts={navCounts} />
       </aside>
 
       {mobileOpen && (
@@ -36,19 +39,27 @@ export function DashboardShell({ companyName, userName, userRole, children }: Pr
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <SidebarNav />
+            <SidebarNav counts={navCounts} />
           </aside>
         </div>
       )}
 
       <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex h-14 items-center justify-between border-b border-border bg-card px-4">
+        <header className="flex h-14 items-center justify-between gap-3 border-b border-border bg-card px-4">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(true)}>
             <Menu className="h-4 w-4" />
           </Button>
-          <div className="hidden md:block" />
+          <div className="hidden flex-1 md:block">
+            <GlobalSearch />
+          </div>
           <div className="flex items-center gap-2">
-            <div className="mr-2 text-right text-sm leading-tight">
+            <Link href="/work-orders/new">
+              <Button size="sm">
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Új munkalap</span>
+              </Button>
+            </Link>
+            <div className="mr-2 hidden text-right text-sm leading-tight sm:block">
               <p className="font-medium text-foreground">{userName}</p>
               <p className="text-xs text-muted-foreground">{userRole === "ADMIN" ? "Admin" : "Munkatárs"}</p>
             </div>

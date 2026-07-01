@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ItemEditor, type ItemDraft } from "@/components/work-orders/item-editor";
 import { STATUS_LABELS, STATUS_ORDER, formatHuf } from "@/lib/work-order";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 export type WorkOrderData = {
   id: string;
@@ -131,6 +132,13 @@ export function WorkOrderDetail({ workOrder }: { workOrder: WorkOrderData }) {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      <Breadcrumbs
+        items={[
+          { label: "Munkalapok", href: "/work-orders" },
+          { label: workOrder.customer.name, href: `/customers/${workOrder.customer.id}` },
+          { label: workOrder.title },
+        ]}
+      />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">{workOrder.title}</h1>

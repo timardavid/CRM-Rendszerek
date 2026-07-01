@@ -1,13 +1,21 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const emptySubscribe = () => () => {};
+
+function useMounted() {
+  return useSyncExternalStore(emptySubscribe, () => true, () => false);
+}
+
 export function ThemeToggle() {
+  const mounted = useMounted();
   const { resolvedTheme, setTheme } = useTheme();
 
-  if (resolvedTheme === undefined) return <Button variant="ghost" size="icon" />;
+  if (!mounted) return <Button variant="ghost" size="icon" />;
 
   const isDark = resolvedTheme === "dark";
 

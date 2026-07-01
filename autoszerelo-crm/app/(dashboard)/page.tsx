@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Table2, Users, Activity, Layers } from "lucide-react";
+import { Wrench, Users, Activity, Banknote } from "lucide-react";
+import { STATUS_LABELS, formatHuf } from "@/lib/work-order";
 
 function startOfToday() {
   const d = new Date();
@@ -9,25 +10,38 @@ function startOfToday() {
   return d;
 }
 
+function startOfMonth() {
+  const d = new Date();
+  d.setDate(1);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
 export default async function OverviewPage() {
-  const [tableCount, userCount, todayActivityCount, tables, recentActivity] = await Promise.all([
-    db.customTable.count(),
-    db.user.count(),
+  const [openWorkOrders, customerCount, todayActivityCount, monthlyPaidInvoices, recentActivity] = await Promise.all([
+    db.workOrder.findMany({
+      where: { status: { not: "HANDED_OVER" } },
+      include: { customer: { select: { name: true } }, vehicle: { select: { licensePlate: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+    }),
+    db.customer.count(),
     db.activityLog.count({ where: { createdAt: { gte: startOfToday() } } }),
-    db.customTable.findMany({
-      include: { _count: { select: { rows: true } } },
-      orderBy: { createdAt: "asc" },
+    db.invoice.findMany({
+      where: { type: "INVOICE", paidAt: { gte: startOfMonth() } },
+      select: { totalAmount: true },
     }),
     db.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 8 }),
   ]);
 
-  const totalRows = tables.reduce((sum, t) => sum + t._count.rows, 0);
+  const openWorkOrderCount = await db.workOrder.count({ where: { status: { not: "HANDED_OVER" } } });
+  const monthlyRevenue = monthlyPaidInvoices.reduce((sum, inv) => sum + Number(inv.totalAmount), 0);
 
   const stats = [
-    { label: "Egyedi táblák", value: tableCount, icon: Table2 },
-    { label: "Összes rekord", value: totalRows, icon: Layers },
+    { label: "Nyitott munkalapok", value: openWorkOrderCount, icon: Wrench },
+    { label: "Ügyfelek", value: customerCount, icon: Users },
+    { label: "Havi bevétel (fizetve)", value: formatHuf(monthlyRevenue), icon: Banknote },
     { label: "Mai aktivitás", value: todayActivityCount, icon: Activity },
-    { label: "Felhasználók", value: userCount, icon: Users },
   ];
 
   return (
@@ -51,27 +65,29 @@ export default async function OverviewPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Táblák</CardTitle>
-            <CardDescription>Gyors hozzáférés a nyilvántartásokhoz.</CardDescription>
+            <CardTitle>Nyitott munkalapok</CardTitle>
+            <CardDescription>Folyamatban lévő munkák.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
-            {tables.length === 0 && (
+            {openWorkOrders.length === 0 && (
               <p className="text-sm text-muted-foreground">
-                Még nincs egyedi tábla. Hozz létre egyet a{" "}
-                <Link href="/tables/new" className="text-primary underline">
-                  Egyedi táblák
+                Nincs nyitott munkalap. Hozz létre egyet az{" "}
+                <Link href="/work-orders/new" className="text-primary underline">
+                  Munkalapok
                 </Link>{" "}
                 menüben.
               </p>
             )}
-            {tables.map((t) => (
+            {openWorkOrders.map((w) => (
               <Link
-                key={t.id}
-                href={`/tables/${t.slug}`}
+                key={w.id}
+                href={`/work-orders/${w.id}`}
                 className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm hover:bg-muted"
               >
-                <span className="text-foreground">{t.name}</span>
-                <span className="text-muted-foreground">{t._count.rows} rekord</span>
+                <span className="text-foreground">
+                  {w.title} <span className="text-muted-foreground">({w.customer.name})</span>
+                </span>
+                <span className="text-muted-foreground">{STATUS_LABELS[w.status] ?? w.status}</span>
               </Link>
             ))}
           </CardContent>

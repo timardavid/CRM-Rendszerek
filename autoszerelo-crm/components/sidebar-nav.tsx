@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Table2, Activity, Settings } from "lucide-react";
+import { LayoutDashboard, Table2, Activity, Settings, Users, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/", label: "Áttekintés", icon: LayoutDashboard },
+  { href: "/customers", label: "Ügyfelek", icon: Users },
+  { href: "/work-orders", label: "Munkalapok", icon: Wrench },
   { href: "/tables", label: "Egyedi táblák", icon: Table2 },
   { href: "/activity", label: "Aktivitás", icon: Activity },
   { href: "/settings", label: "Beállítások", icon: Settings },

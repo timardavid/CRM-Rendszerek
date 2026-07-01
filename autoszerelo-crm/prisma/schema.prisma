@@ -24,22 +24,24 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  activityLogs ActivityLog[]
-  customTables CustomTable[] @relation("CreatedTables")
-  customRows   CustomRow[]   @relation("CreatedRows")
+  activityLogs    ActivityLog[]
+  customTables    CustomTable[] @relation("CreatedTables")
+  customRows      CustomRow[]   @relation("CreatedRows")
+  createdOrders   WorkOrder[]   @relation("CreatedWorkOrders")
+  createdInvoices Invoice[]     @relation("CreatedInvoices")
 
   @@index([email])
 }
 
 model Settings {
-  id            String   @id @default("singleton")
-  companyName   String
-  logoUrl       String?
-  accentColor   String   @default("#2563eb")
-  contactEmail  String?
-  contactPhone  String?
-  address       String?
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default("singleton")
+  companyName  String
+  logoUrl      String?
+  accentColor  String   @default("#2563eb")
+  contactEmail String?
+  contactPhone String?
+  address      String?
+  updatedAt    DateTime @updatedAt
 }
 
 model ActivityLog {
@@ -110,4 +112,111 @@ model CustomRow {
   createdBy User?       @relation("CreatedRows", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([tableId])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicles   Vehicle[]
+  workOrders WorkOrder[]
+
+  @@index([name])
+}
+
+model Vehicle {
+  id           String   @id @default(cuid())
+  customerId   String
+  licensePlate String
+  make         String?
+  model        String?
+  year         Int?
+  vin          String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  customer   Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  workOrders WorkOrder[]
+
+  @@index([customerId])
+  @@index([licensePlate])
+}
+
+enum WorkOrderStatus {
+  RECEIVED
+  DIAGNOSED
+  IN_PROGRESS
+  DONE
+  HANDED_OVER
+}
+
+model WorkOrder {
+  id          String          @id @default(cuid())
+  customerId  String
+  vehicleId   String?
+  title       String
+  description String?
+  status      WorkOrderStatus @default(RECEIVED)
+  createdById String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  closedAt    DateTime?
+
+  customer  Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  vehicle   Vehicle?        @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  createdBy User?           @relation("CreatedWorkOrders", fields: [createdById], references: [id], onDelete: SetNull)
+  items     WorkOrderItem[]
+  invoices  Invoice[]
+
+  @@index([customerId])
+  @@index([vehicleId])
+  @@index([status])
+}
+
+enum WorkOrderItemType {
+  LABOR
+  PART
+}
+
+model WorkOrderItem {
+  id          String            @id @default(cuid())
+  workOrderId String
+  type        WorkOrderItemType
+  description String
+  quantity    Decimal           @default(1) @db.Decimal(10, 2)
+  unitPrice   Decimal           @db.Decimal(10, 2)
+  order       Int               @default(0)
+
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+
+  @@index([workOrderId])
+}
+
+enum InvoiceType {
+  QUOTE
+  INVOICE
+}
+
+model Invoice {
+  id            String      @id @default(cuid())
+  workOrderId   String
+  number        String      @unique
+  type          InvoiceType
+  itemsSnapshot Json
+  totalAmount   Decimal     @db.Decimal(10, 2)
+  issuedAt      DateTime    @default(now())
+  paidAt        DateTime?
+  createdById   String?
+
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  createdBy User?     @relation("CreatedInvoices", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([workOrderId])
 }

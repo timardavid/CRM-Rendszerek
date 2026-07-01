@@ -35,7 +35,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!existing) return NextResponse.json({ error: "Nincs ilyen munkalap" }, { status: 404 });
 
   const body = await req.json();
-  const { title, description, vehicleId, status, items } = body ?? {};
+  const { title, description, vehicleId, status, scheduledAt, items } = body ?? {};
 
   if (status && !VALID_STATUSES.includes(status)) {
     return NextResponse.json({ error: "Érvénytelen státusz." }, { status: 400 });
@@ -64,6 +64,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(title ? { title } : {}),
         ...(description !== undefined ? { description: description || null } : {}),
         ...(vehicleId !== undefined ? { vehicleId: vehicleId || null } : {}),
+        ...(scheduledAt !== undefined ? { scheduledAt: scheduledAt ? new Date(scheduledAt) : null } : {}),
         ...(status
           ? {
               status,

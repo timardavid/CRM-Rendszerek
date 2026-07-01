@@ -24,6 +24,7 @@ export default async function WorkOrderDetailPage({ params }: { params: Promise<
         title: workOrder.title,
         description: workOrder.description,
         status: workOrder.status,
+        scheduledAt: workOrder.scheduledAt?.toISOString() ?? null,
         customer: workOrder.customer,
         vehicle: workOrder.vehicle,
         items: workOrder.items.map((i) => ({

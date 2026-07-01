@@ -28,6 +28,7 @@ export function WorkOrderForm({
   const [vehicleId, setVehicleId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [scheduledAt, setScheduledAt] = useState("");
   const [items, setItems] = useState<ItemDraft[]>([{ ...EMPTY_ITEM }]);
   const [loading, setLoading] = useState(false);
 
@@ -49,6 +50,7 @@ export function WorkOrderForm({
           vehicleId: vehicleId || undefined,
           title,
           description,
+          scheduledAt: scheduledAt || undefined,
           items: items
             .filter((i) => i.description.trim())
             .map((i) => ({ type: i.type, description: i.description, quantity: Number(i.quantity), unitPrice: Number(i.unitPrice) })),
@@ -124,6 +126,18 @@ export function WorkOrderForm({
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="woTitle">Munka címe *</Label>
               <Input id="woTitle" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="pl. Fékbetét csere" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="woScheduledAt">Időpont (opcionális)</Label>
+              <Input
+                id="woScheduledAt"
+                type="datetime-local"
+                value={scheduledAt}
+                onChange={(e) => setScheduledAt(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Ha megadod, a munka bekerül a Naptár nézetbe és a naptár-feliratkozásba is.
+              </p>
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="woDescription">Leírás</Label>

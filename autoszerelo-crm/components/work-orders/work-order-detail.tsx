@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ItemEditor, type ItemDraft } from "@/components/work-orders/item-editor";
 import { STATUS_LABELS, STATUS_ORDER, formatHuf } from "@/lib/work-order";
+import { toDatetimeLocalValue } from "@/lib/date";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
 export type WorkOrderData = {
@@ -19,6 +20,7 @@ export type WorkOrderData = {
   title: string;
   description: string | null;
   status: string;
+  scheduledAt: string | null;
   customer: { id: string; name: string };
   vehicle: { id: string; licensePlate: string } | null;
   items: ItemDraft[];
@@ -36,6 +38,7 @@ export function WorkOrderDetail({ workOrder }: { workOrder: WorkOrderData }) {
   const router = useRouter();
   const [title, setTitle] = useState(workOrder.title);
   const [description, setDescription] = useState(workOrder.description ?? "");
+  const [scheduledAt, setScheduledAt] = useState(toDatetimeLocalValue(workOrder.scheduledAt));
   const [items, setItems] = useState<ItemDraft[]>(workOrder.items.length ? workOrder.items : []);
   const [status, setStatus] = useState(workOrder.status);
   const [savingDetails, setSavingDetails] = useState(false);
@@ -49,7 +52,7 @@ export function WorkOrderDetail({ workOrder }: { workOrder: WorkOrderData }) {
       const res = await fetch(`/api/work-orders/${workOrder.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description }),
+        body: JSON.stringify({ title, description, scheduledAt: scheduledAt || null }),
       });
       if (!res.ok) {
         toast.error("Nem sikerült menteni.");
@@ -180,6 +183,18 @@ export function WorkOrderDetail({ workOrder }: { workOrder: WorkOrderData }) {
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="woTitle">Cím</Label>
             <Input id="woTitle" value={title} onChange={(e) => setTitle(e.target.value)} />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="woScheduledAt">Időpont</Label>
+            <Input
+              id="woScheduledAt"
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Megjelenik a Naptár nézetben és a naptár-feliratkozásban (Google/Apple naptár).
+            </p>
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="woDescription">Leírás</Label>

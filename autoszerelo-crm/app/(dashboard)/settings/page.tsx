@@ -5,6 +5,7 @@ import { AccountTab } from "@/components/settings/account-tab";
 import { TwoFactorTab } from "@/components/settings/two-factor-tab";
 import { TeamTab } from "@/components/settings/team-tab";
 import { BrandingTab } from "@/components/settings/branding-tab";
+import { CalendarTab } from "@/components/settings/calendar-tab";
 import { DangerZoneTab } from "@/components/settings/danger-zone-tab";
 
 export default async function SettingsPage() {
@@ -30,6 +31,7 @@ export default async function SettingsPage() {
           <TabsTrigger value="2fa">2FA</TabsTrigger>
           {isAdmin && <TabsTrigger value="team">Csapat</TabsTrigger>}
           {isAdmin && <TabsTrigger value="branding">Márkázás</TabsTrigger>}
+          <TabsTrigger value="calendar">Naptár</TabsTrigger>
           <TabsTrigger value="danger">Veszélyzóna</TabsTrigger>
         </TabsList>
 
@@ -61,6 +63,10 @@ export default async function SettingsPage() {
             />
           </TabsContent>
         )}
+
+        <TabsContent value="calendar">
+          <CalendarTab calendarToken={settings?.calendarToken ?? null} isAdmin={isAdmin} />
+        </TabsContent>
 
         <TabsContent value="danger">
           <DangerZoneTab />

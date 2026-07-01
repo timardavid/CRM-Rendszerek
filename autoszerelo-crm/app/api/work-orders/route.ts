@@ -25,7 +25,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Nincs bejelentkezve" }, { status: 401 });
 
   const body = await req.json();
-  const { customerId, vehicleId, title, description, items } = body ?? {};
+  const { customerId, vehicleId, title, description, scheduledAt, items } = body ?? {};
 
   if (!customerId || !title) {
     return NextResponse.json({ error: "Ügyfél és cím megadása kötelező." }, { status: 400 });
@@ -40,6 +40,7 @@ export async function POST(req: Request) {
       vehicleId: vehicleId || null,
       title,
       description: description || null,
+      scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
       createdById: session.user.id,
       items: {
         create: ((items as ItemInput[]) ?? [])

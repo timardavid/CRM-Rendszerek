@@ -3,19 +3,7 @@ import { db } from "@/lib/db";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Wrench, Users, Activity, Banknote } from "lucide-react";
 import { STATUS_LABELS, formatHuf } from "@/lib/work-order";
-
-function startOfToday() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function startOfMonth() {
-  const d = new Date();
-  d.setDate(1);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
+import { startOfToday, startOfMonth } from "@/lib/date";
 
 export default async function OverviewPage() {
   const [openWorkOrders, customerCount, todayActivityCount, monthlyPaidInvoices, recentActivity] = await Promise.all([

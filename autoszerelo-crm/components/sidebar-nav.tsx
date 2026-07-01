@@ -19,7 +19,7 @@ const links = [
   { href: "/settings", label: "Beállítások", icon: Settings, countKey: undefined },
 ];
 
-export function SidebarNav({ counts }: { counts?: NavCounts }) {
+export function SidebarNav({ counts, collapsed = false }: { counts?: NavCounts; collapsed?: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -31,22 +31,28 @@ export function SidebarNav({ counts }: { counts?: NavCounts }) {
           <Link
             key={href}
             href={href}
+            title={collapsed ? label : undefined}
             className={cn(
               "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              collapsed && "justify-center px-0",
               active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
-            <Icon className="h-4 w-4" />
-            <span className="flex-1">{label}</span>
-            {typeof count === "number" && count > 0 && (
-              <span
-                className={cn(
-                  "rounded-full px-2 py-0.5 text-xs font-semibold",
-                  active ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
+            <Icon className="h-4 w-4 shrink-0" />
+            {!collapsed && (
+              <>
+                <span className="flex-1">{label}</span>
+                {typeof count === "number" && count > 0 && (
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-xs font-semibold",
+                      active ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {count}
+                  </span>
                 )}
-              >
-                {count}
-              </span>
+              </>
             )}
           </Link>
         );

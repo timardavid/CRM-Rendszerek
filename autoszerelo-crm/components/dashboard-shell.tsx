@@ -2,37 +2,61 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, Plus } from "lucide-react";
+import { Menu, X, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { SidebarNav, type NavCounts } from "@/components/sidebar-nav";
+import { SidebarSummary, type SidebarSummaryData } from "@/components/sidebar-summary";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LogoutButton } from "@/components/logout-button";
 import { GlobalSearch } from "@/components/global-search";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useSidebarCollapsed } from "@/lib/use-sidebar-collapsed";
 
 type Props = {
   companyName: string;
   userName: string;
   userRole: string;
   navCounts: NavCounts;
+  summary: SidebarSummaryData;
   children: React.ReactNode;
 };
 
-export function DashboardShell({ companyName, userName, userRole, navCounts, children }: Props) {
+export function DashboardShell({ companyName, userName, userRole, navCounts, summary, children }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, toggleCollapsed] = useSidebarCollapsed();
 
   return (
     <div className="flex min-h-screen w-full">
-      <aside className="hidden w-64 shrink-0 border-r border-border bg-card md:flex md:flex-col">
-        <div className="border-b border-border p-4">
-          <p className="truncate font-semibold text-foreground">{companyName}</p>
+      <aside
+        className={cn(
+          "hidden shrink-0 border-r border-border bg-card transition-[width] duration-150 md:flex md:flex-col",
+          collapsed ? "w-16" : "w-64"
+        )}
+      >
+        <div className="flex items-center justify-between border-b border-border p-4">
+          {!collapsed && <p className="truncate font-semibold text-foreground">{companyName}</p>}
+          <Button
+            variant="ghost"
+            size="icon"
+            className={collapsed ? "mx-auto" : ""}
+            onClick={toggleCollapsed}
+            aria-label={collapsed ? "Sidebar kinyitása" : "Sidebar összecsukása"}
+          >
+            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
         </div>
-        <SidebarNav counts={navCounts} />
+        <SidebarNav counts={navCounts} collapsed={collapsed} />
+        {!collapsed && (
+          <div className="mt-auto">
+            <SidebarSummary summary={summary} />
+          </div>
+        )}
       </aside>
 
       {mobileOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 h-full w-64 border-r border-border bg-card">
+          <aside className="absolute left-0 top-0 flex h-full w-64 flex-col border-r border-border bg-card">
             <div className="flex items-center justify-between border-b border-border p-4">
               <p className="truncate font-semibold text-foreground">{companyName}</p>
               <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
@@ -40,6 +64,9 @@ export function DashboardShell({ companyName, userName, userRole, navCounts, chi
               </Button>
             </div>
             <SidebarNav counts={navCounts} />
+            <div className="mt-auto">
+              <SidebarSummary summary={summary} />
+            </div>
           </aside>
         </div>
       )}

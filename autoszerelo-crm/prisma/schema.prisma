@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+model User {
+  id               String    @id @default(cuid())
+  name             String
+  email            String    @unique
+  passwordHash     String
+  role             Role      @default(STAFF)
+  image            String?
+  twoFactorSecret  String?
+  twoFactorEnabled Boolean   @default(false)
+  lastLoginAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  activityLogs ActivityLog[]
+  customTables CustomTable[] @relation("CreatedTables")
+  customRows   CustomRow[]   @relation("CreatedRows")
+
+  @@index([email])
+}
+
+model Settings {
+  id            String   @id @default("singleton")
+  companyName   String
+  logoUrl       String?
+  accentColor   String   @default("#2563eb")
+  contactEmail  String?
+  contactPhone  String?
+  address       String?
+  updatedAt     DateTime @updatedAt
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  userName   String
+  action     String
+  entityType String
+  entityId   String?
+  details    String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([userId])
+}
+
+model CustomTable {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  icon        String?
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User?         @relation("CreatedTables", fields: [createdById], references: [id], onDelete: SetNull)
+  fields    CustomField[]
+  rows      CustomRow[]
+}
+
+enum FieldType {
+  TEXT
+  TEXTAREA
+  NUMBER
+  CURRENCY
+  DATE
+  BOOLEAN
+  SELECT
+}
+
+model CustomField {
+  id       String    @id @default(cuid())
+  tableId  String
+  name     String
+  key      String
+  type     FieldType
+  required Boolean   @default(false)
+  options  String?
+  order    Int       @default(0)
+
+  table CustomTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  @@unique([tableId, key])
+}
+
+model CustomRow {
+  id          String   @id @default(cuid())
+  tableId     String
+  data        Json
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  table     CustomTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  createdBy User?       @relation("CreatedRows", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([tableId])
+}

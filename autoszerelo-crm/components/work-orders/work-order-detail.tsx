@@ -149,6 +149,10 @@ export function WorkOrderDetail({ workOrder }: { workOrder: WorkOrderData }) {
       <Card>
         <CardHeader>
           <CardTitle>Státusz</CardTitle>
+          <CardDescription>
+            Kattints arra az állapotra, ahol a munka éppen tart. Ez segít áttekinteni az Áttekintés oldalon, mely
+            munkák vannak még folyamatban.
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           {STATUS_ORDER.map((s) => (
@@ -162,7 +166,7 @@ export function WorkOrderDetail({ workOrder }: { workOrder: WorkOrderData }) {
       <Card>
         <CardHeader>
           <CardTitle>Adatok</CardTitle>
-          <CardDescription>Munka címe és leírása.</CardDescription>
+          <CardDescription>A munka rövid címe (ez jelenik meg a listákban) és a részletes leírása.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
@@ -176,6 +180,7 @@ export function WorkOrderDetail({ workOrder }: { workOrder: WorkOrderData }) {
               className="min-h-20 rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              placeholder="pl. mit panaszolt az ügyfél, mit találtál diagnosztizáláskor…"
             />
           </div>
           <Button onClick={saveDetails} disabled={savingDetails} className="w-fit">
@@ -187,20 +192,28 @@ export function WorkOrderDetail({ workOrder }: { workOrder: WorkOrderData }) {
       <Card>
         <CardHeader>
           <CardTitle>Tételek</CardTitle>
-          <CardDescription>Munkadíj és alkatrész tételek.</CardDescription>
+          <CardDescription>Munkadíj és alkatrész tételek — ebből számolódik az árajánlat/számla összege.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <ItemEditor items={items} onChange={setItems} />
           <Button onClick={saveItems} disabled={savingItems} className="w-fit">
             {savingItems ? "Mentés…" : "Tételek mentése"}
           </Button>
+          <p className="text-xs text-muted-foreground">
+            Ne felejtsd el megnyomni a &quot;Tételek mentése&quot; gombot, különben az árajánlat/számla a régi
+            tételekkel készül el.
+          </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
           <CardTitle>Árajánlat / Számla</CardTitle>
-          <CardDescription>A jelenlegi tételek alapján készíthetsz dokumentumot.</CardDescription>
+          <CardDescription>
+            <strong>Árajánlat</strong>: tájékoztató jellegű, nem kötelezi fizetésre az ügyfelet, munka előtt add oda.{" "}
+            <strong>Számla</strong>: hivatalos, fizetési kötelezettséget keletkeztet, a munka végén állítsd ki.
+            Mindkettő a fent mentett tételek alapján készül, és utólag is bármikor megnyithatod, kinyomtathatod.
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex gap-2">

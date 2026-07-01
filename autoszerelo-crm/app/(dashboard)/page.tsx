@@ -46,7 +46,13 @@ export default async function OverviewPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-foreground">Áttekintés</h1>
+      <div>
+        <h1 className="text-2xl font-semibold text-foreground">Áttekintés</h1>
+        <p className="text-sm text-muted-foreground">
+          Gyors pillantás arra, mi van folyamatban. A &quot;Havi bevétel&quot; csak a fizetettként megjelölt
+          számlákat számolja, a folyó hónapra.
+        </p>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map(({ label, value, icon: Icon }) => (

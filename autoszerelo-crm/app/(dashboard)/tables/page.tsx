@@ -20,6 +20,10 @@ export default async function TablesPage() {
           </Button>
         </Link>
       </div>
+      <p className="text-sm text-muted-foreground">
+        Saját nyilvántartásaid, amikre nincs beépített menüpont (pl. beszállítók, raktárkészlet). Az Ügyfelek és
+        Munkalapok saját menüponttal rendelkeznek, azokat ott kezeld.
+      </p>
 
       <TableList
         tables={tables.map((t) => ({

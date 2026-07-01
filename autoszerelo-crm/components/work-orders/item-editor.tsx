@@ -30,49 +30,73 @@ export function ItemEditor({ items, onChange }: { items: ItemDraft[]; onChange: 
   const total = itemsTotal(items.map((i) => ({ quantity: i.quantity, unitPrice: i.unitPrice })));
 
   return (
-    <div className="flex flex-col gap-2">
-      {items.map((item, index) => (
-        <div key={index} className="grid grid-cols-[100px_1fr_80px_110px_auto] gap-2 items-center">
-          <select
-            className="h-10 rounded-md border border-border bg-card px-2 text-sm text-foreground"
-            value={item.type}
-            onChange={(e) => update(index, { type: e.target.value as ItemDraft["type"] })}
-          >
-            <option value="LABOR">Munkadíj</option>
-            <option value="PART">Alkatrész</option>
-          </select>
-          <Input
-            placeholder="Megnevezés"
-            value={item.description}
-            onChange={(e) => update(index, { description: e.target.value })}
-          />
-          <Input
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder="Menny."
-            value={item.quantity}
-            onChange={(e) => update(index, { quantity: e.target.value })}
-          />
-          <Input
-            type="number"
-            min="0"
-            step="1"
-            placeholder="Egységár"
-            value={item.unitPrice}
-            onChange={(e) => update(index, { unitPrice: e.target.value })}
-          />
-          <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(index)}>
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
+    <div className="flex flex-col gap-2 overflow-x-auto">
+      <p className="text-xs text-muted-foreground">
+        Vegyél fel egy sort minden elvégzett munkára (<strong>Munkadíj</strong>) és minden felhasznált
+        alkatrészre (<strong>Alkatrész</strong>) külön-külön. Ezekből számolja a rendszer az összeget, és ezek
+        kerülnek majd az árajánlatra/számlára is.
+      </p>
+      <div className="min-w-[560px]">
+        {items.length > 0 && (
+          <div className="grid grid-cols-[110px_1fr_90px_120px_90px_auto] gap-2 px-1 pb-1 text-xs font-medium text-muted-foreground">
+            <span>Típus</span>
+            <span>Megnevezés</span>
+            <span>Mennyiség</span>
+            <span>Egységár (Ft)</span>
+            <span className="text-right">Sor összesen</span>
+            <span />
+          </div>
+        )}
+        <div className="flex flex-col gap-2">
+          {items.map((item, index) => (
+            <div key={index} className="grid grid-cols-[110px_1fr_90px_120px_90px_auto] items-center gap-2">
+              <select
+                aria-label="Tétel típusa"
+                className="h-10 rounded-md border border-border bg-card px-2 text-sm text-foreground"
+                value={item.type}
+                onChange={(e) => update(index, { type: e.target.value as ItemDraft["type"] })}
+              >
+                <option value="LABOR">Munkadíj</option>
+                <option value="PART">Alkatrész</option>
+              </select>
+              <Input
+                aria-label="Megnevezés"
+                placeholder="pl. Fékbetét csere"
+                value={item.description}
+                onChange={(e) => update(index, { description: e.target.value })}
+              />
+              <Input
+                aria-label="Mennyiség"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="1"
+                value={item.quantity}
+                onChange={(e) => update(index, { quantity: e.target.value })}
+              />
+              <Input
+                aria-label="Egységár forintban"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="0"
+                value={item.unitPrice}
+                onChange={(e) => update(index, { unitPrice: e.target.value })}
+              />
+              <span className="text-right text-sm text-muted-foreground">
+                {formatHuf(Number(item.quantity || 0) * Number(item.unitPrice || 0))}
+              </span>
+              <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(index)} aria-label="Tétel törlése">
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
       <Button type="button" variant="outline" onClick={addItem} className="w-fit">
         <Plus className="h-4 w-4" /> Tétel hozzáadása
       </Button>
-      <p className="text-right text-sm font-medium text-foreground">
-        Összesen: {formatHuf(total)}
-      </p>
+      <p className="text-right text-sm font-medium text-foreground">Összesen: {formatHuf(total)}</p>
     </div>
   );
 }

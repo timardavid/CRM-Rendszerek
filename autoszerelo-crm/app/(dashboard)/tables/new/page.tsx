@@ -85,10 +85,16 @@ export default function NewTablePage() {
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <h1 className="text-2xl font-semibold text-foreground">Új egyedi tábla</h1>
 
+      <p className="text-sm text-muted-foreground">
+        Akkor hozz létre egyedi táblát, ha valamit nyilván szeretnél tartani, amire nincs beépített funkció (pl.
+        beszállítók, raktárkészlet, előjegyzések). Te adod meg, milyen mezői legyenek — utána azonnal fel is tudsz
+        vinni rekordokat, nincs szükség fejlesztői segítségre.
+      </p>
+
       <Card>
         <CardHeader>
           <CardTitle>Alapadatok</CardTitle>
-          <CardDescription>Pl. „Járművek”, „Szervizmunkák”, „Beszállítók”.</CardDescription>
+          <CardDescription>Pl. „Beszállítók”, „Raktárkészlet”, „Előjegyzések”.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -139,7 +145,7 @@ export default function NewTablePage() {
                       checked={field.required}
                       onChange={(e) => updateField(index, { required: e.target.checked })}
                     />
-                    Kötelező mező
+                    Kötelező mező — ha be van pipálva, új rekord felvitelekor nem hagyható üresen
                   </label>
                 </div>
               ))}

@@ -56,7 +56,10 @@ export function BrandingTab({
     <Card>
       <CardHeader>
         <CardTitle>Márkázás és cégadatok</CardTitle>
-        <CardDescription>A cég neve jelenik meg a CRM címeként mindenhol.</CardDescription>
+        <CardDescription>
+          A cég neve jelenik meg a CRM címeként mindenhol (böngésző fül, bejelentkezés, oldalsáv). A lenti
+          elérhetőségek pedig az árajánlatok és számlák fejlécén jelennek meg.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

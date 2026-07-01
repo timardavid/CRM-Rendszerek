@@ -59,7 +59,12 @@ export function CustomerList({ customers }: { customers: CustomerSummary[] }) {
         </Button>
       </div>
 
-      {customers.length === 0 && <p className="text-sm text-muted-foreground">Még nincs felvett ügyfél.</p>}
+      {customers.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          Még nincs felvett ügyfél. Kattints az &quot;Új ügyfél&quot; gombra az első felvitelhez — utána hozzá tudsz
+          rendelni járműveket és munkalapokat is.
+        </p>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {customers.map((c) => (

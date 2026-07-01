@@ -70,7 +70,10 @@ export function TeamTab({ members, currentUserId }: { members: TeamMember[]; cur
       <Card>
         <CardHeader>
           <CardTitle>Csapat</CardTitle>
-          <CardDescription>A rendszerhez hozzáférő profilok.</CardDescription>
+          <CardDescription>
+            A rendszerhez hozzáférő profilok. Az utolsó belépés oszlopból látod, ki mikor használta a rendszert
+            utoljára.
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           {members.map((m) => (
@@ -95,7 +98,11 @@ export function TeamTab({ members, currentUserId }: { members: TeamMember[]; cur
       <Card>
         <CardHeader>
           <CardTitle>Új profil hozzáadása</CardTitle>
-          <CardDescription>Munkatársnak vagy admin fiók létrehozása.</CardDescription>
+          <CardDescription>
+            <strong>Admin</strong>: mindenhez hozzáfér, ő állíthatja be a márkázást, kezelheti a csapatot és láthatja a
+            veszélyzónát. <strong>Munkatárs</strong>: a napi munkához fér hozzá (ügyfelek, munkalapok, egyedi táblák),
+            de nem módosíthatja a rendszer beállításait és nem adhat hozzá/törölhet más profilt.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAdd} className="flex flex-col gap-4">

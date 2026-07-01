@@ -68,7 +68,10 @@ export function TwoFactorTab({ enabled }: { enabled: boolean }) {
       <CardHeader>
         <CardTitle>Kétfaktoros hitelesítés (2FA)</CardTitle>
         <CardDescription>
-          {enabled ? "Jelenleg be van kapcsolva a fiókodon." : "Jelenleg ki van kapcsolva."}
+          Extra védelem a fiókodnak: bejelentkezéskor a jelszó mellett egy telefonos alkalmazásból (pl. Google
+          Authenticator, Microsoft Authenticator) kapott, folyamatosan változó 6 jegyű kódot is be kell írnod. Így
+          akkor sem tud belépni más, ha kitudódik a jelszavad.{" "}
+          <strong>{enabled ? "Jelenleg be van kapcsolva a fiókodon." : "Jelenleg ki van kapcsolva."}</strong>
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

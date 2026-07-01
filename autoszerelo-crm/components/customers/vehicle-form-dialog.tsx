@@ -72,26 +72,26 @@ export function VehicleFormDialog({ open, onOpenChange, title, initial, onSubmit
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="vehPlate">Rendszám *</Label>
-            <Input id="vehPlate" value={values.licensePlate} onChange={(e) => set("licensePlate", e.target.value)} />
+            <Input id="vehPlate" placeholder="pl. ABC-123" value={values.licensePlate} onChange={(e) => set("licensePlate", e.target.value)} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="vehMake">Márka</Label>
-              <Input id="vehMake" value={values.make} onChange={(e) => set("make", e.target.value)} />
+              <Input id="vehMake" placeholder="pl. Opel" value={values.make} onChange={(e) => set("make", e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="vehModel">Típus</Label>
-              <Input id="vehModel" value={values.model} onChange={(e) => set("model", e.target.value)} />
+              <Input id="vehModel" placeholder="pl. Astra" value={values.model} onChange={(e) => set("model", e.target.value)} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="vehYear">Évjárat</Label>
-              <Input id="vehYear" type="number" value={values.year} onChange={(e) => set("year", e.target.value)} />
+              <Input id="vehYear" type="number" placeholder="pl. 2018" value={values.year} onChange={(e) => set("year", e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="vehVin">Alvázszám</Label>
-              <Input id="vehVin" value={values.vin} onChange={(e) => set("vin", e.target.value)} />
+              <Label htmlFor="vehVin">Alvázszám (opcionális)</Label>
+              <Input id="vehVin" placeholder="VIN azonosító" value={values.vin} onChange={(e) => set("vin", e.target.value)} />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">

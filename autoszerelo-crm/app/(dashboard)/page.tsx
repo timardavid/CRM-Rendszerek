@@ -1,12 +1,27 @@
 import Link from "next/link";
+import { AlertTriangle, Clock } from "lucide-react";
 import { db } from "@/lib/db";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Wrench, Users, Activity, Banknote } from "lucide-react";
 import { STATUS_LABELS, formatHuf } from "@/lib/work-order";
 import { startOfToday, startOfMonth } from "@/lib/date";
 
+const STALE_DAYS = 5;
+
 export default async function OverviewPage() {
-  const [openWorkOrders, customerCount, todayActivityCount, monthlyPaidInvoices, recentActivity] = await Promise.all([
+  const now = new Date();
+  const in48h = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+  const staleThreshold = new Date(now.getTime() - STALE_DAYS * 24 * 60 * 60 * 1000);
+
+  const [
+    openWorkOrders,
+    customerCount,
+    todayActivityCount,
+    monthlyPaidInvoices,
+    recentActivity,
+    upcomingAppointments,
+    staleWorkOrders,
+  ] = await Promise.all([
     db.workOrder.findMany({
       where: { status: { not: "HANDED_OVER" } },
       include: { customer: { select: { name: true } }, vehicle: { select: { licensePlate: true } } },
@@ -20,10 +35,22 @@ export default async function OverviewPage() {
       select: { totalAmount: true },
     }),
     db.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 8 }),
+    db.workOrder.findMany({
+      where: { scheduledAt: { gte: now, lte: in48h }, status: { not: "HANDED_OVER" } },
+      include: { customer: { select: { name: true } }, vehicle: { select: { licensePlate: true } } },
+      orderBy: { scheduledAt: "asc" },
+    }),
+    db.workOrder.findMany({
+      where: { status: { in: ["RECEIVED", "DIAGNOSED", "IN_PROGRESS"] }, updatedAt: { lt: staleThreshold } },
+      include: { customer: { select: { name: true } } },
+      orderBy: { updatedAt: "asc" },
+      take: 5,
+    }),
   ]);
 
   const openWorkOrderCount = await db.workOrder.count({ where: { status: { not: "HANDED_OVER" } } });
   const monthlyRevenue = monthlyPaidInvoices.reduce((sum, inv) => sum + Number(inv.totalAmount), 0);
+  const hasReminders = upcomingAppointments.length > 0 || staleWorkOrders.length > 0;
 
   const stats = [
     { label: "Nyitott munkalapok", value: openWorkOrderCount, icon: Wrench },
@@ -41,6 +68,59 @@ export default async function OverviewPage() {
           számlákat számolja, a folyó hónapra.
         </p>
       </div>
+
+      {hasReminders && (
+        <Card className="border-amber-500/40 bg-amber-500/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+              <AlertTriangle className="h-5 w-5" /> Emlékeztetők
+            </CardTitle>
+            <CardDescription>Amire most érdemes ránézni.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            {upcomingAppointments.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                  <Clock className="h-4 w-4" /> Közelgő időpontok (48 órán belül)
+                </p>
+                {upcomingAppointments.map((w) => (
+                  <Link
+                    key={w.id}
+                    href={`/work-orders/${w.id}`}
+                    className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-2 text-sm hover:bg-muted"
+                  >
+                    <span className="text-foreground">
+                      {w.title} <span className="text-muted-foreground">({w.customer.name}{w.vehicle ? ` — ${w.vehicle.licensePlate}` : ""})</span>
+                    </span>
+                    <span className="text-muted-foreground">
+                      {w.scheduledAt?.toLocaleString("hu-HU", { weekday: "short", hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
+            {staleWorkOrders.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                  <AlertTriangle className="h-4 w-4" /> {STALE_DAYS}+ napja nincs frissítve
+                </p>
+                {staleWorkOrders.map((w) => (
+                  <Link
+                    key={w.id}
+                    href={`/work-orders/${w.id}`}
+                    className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-2 text-sm hover:bg-muted"
+                  >
+                    <span className="text-foreground">
+                      {w.title} <span className="text-muted-foreground">({w.customer.name})</span>
+                    </span>
+                    <span className="text-muted-foreground">{STATUS_LABELS[w.status] ?? w.status}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map(({ label, value, icon: Icon }) => (

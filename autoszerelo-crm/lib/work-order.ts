@@ -8,6 +8,10 @@ export const STATUS_LABELS: Record<string, string> = {
 
 export const STATUS_ORDER = ["RECEIVED", "DIAGNOSED", "IN_PROGRESS", "DONE", "HANDED_OVER"] as const;
 
+// Munkák, amiken még ténylegesen dolgozni kell — a "Kész" státusz már nem
+// számít hátralévő munkának, csak átadásra vár.
+export const REMAINING_WORK_STATUSES = ["RECEIVED", "DIAGNOSED", "IN_PROGRESS"] as const;
+
 export const STATUS_BADGE_CLASSES: Record<string, string> = {
   RECEIVED: "bg-slate-500/10 text-slate-600 dark:text-slate-300",
   DIAGNOSED: "bg-blue-500/10 text-blue-600 dark:text-blue-400",

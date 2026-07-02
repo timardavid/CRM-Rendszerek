@@ -1,7 +1,9 @@
+import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { WorkOrderList } from "@/components/work-orders/work-order-list";
 
 export default async function WorkOrdersPage() {
+  const session = await auth();
   const workOrders = await db.workOrder.findMany({
     include: {
       customer: { select: { id: true, name: true } },
@@ -13,6 +15,7 @@ export default async function WorkOrdersPage() {
 
   return (
     <WorkOrderList
+      isAdmin={session?.user?.role === "ADMIN"}
       workOrders={workOrders.map((w) => ({
         id: w.id,
         title: w.title,

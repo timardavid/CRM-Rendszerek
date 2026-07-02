@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { startOfToday, startOfMonth } from "@/lib/date";
+import { REMAINING_WORK_STATUSES } from "@/lib/work-order";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const [settings, openWorkOrderCount, customerCount, todayActivityCount, monthlyPaidInvoices, upcomingAppointmentCount] =
     await Promise.all([
       db.settings.findUnique({ where: { id: "singleton" } }).catch(() => null),
-      db.workOrder.count({ where: { status: { not: "HANDED_OVER" } } }),
+      db.workOrder.count({ where: { status: { in: [...REMAINING_WORK_STATUSES] } } }),
       db.customer.count(),
       db.activityLog.count({ where: { createdAt: { gte: startOfToday() } } }),
       db.invoice.findMany({

@@ -1,16 +1,19 @@
 import Link from "next/link";
 import { AlertTriangle, Clock } from "lucide-react";
+import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Wrench, Users, Activity, Banknote } from "lucide-react";
-import { STATUS_LABELS, STATUS_BADGE_CLASSES, formatHuf, itemsTotal } from "@/lib/work-order";
+import { STATUS_LABELS, STATUS_BADGE_CLASSES, formatHuf } from "@/lib/work-order";
 import { startOfToday, startOfMonth } from "@/lib/date";
 import { activityIcon, activityIconColor, activitySentence } from "@/lib/activity-format";
 import { cn } from "@/lib/utils";
+import { OpenWorkOrdersCard } from "@/components/work-orders/open-work-orders-card";
 
 const STALE_DAYS = 5;
 
 export default async function OverviewPage() {
+  const session = await auth();
   const now = new Date();
   const in48h = new Date(now.getTime() + 48 * 60 * 60 * 1000);
   const staleThreshold = new Date(now.getTime() - STALE_DAYS * 24 * 60 * 60 * 1000);
@@ -145,49 +148,17 @@ export default async function OverviewPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Nyitott munkalapok</CardTitle>
-            <CardDescription>Folyamatban lévő munkák.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            {openWorkOrders.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                Nincs nyitott munkalap. Hozz létre egyet az{" "}
-                <Link href="/work-orders/new" className="text-primary underline">
-                  Munkalapok
-                </Link>{" "}
-                menüben.
-              </p>
-            )}
-            {openWorkOrders.map((w) => (
-              <Link
-                key={w.id}
-                href={`/work-orders/${w.id}`}
-                className="flex items-center gap-3 rounded-md border border-border px-3 py-2.5 text-sm hover:bg-muted"
-              >
-                <Wrench className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate font-medium text-foreground">{w.title}</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {w.customer.name}
-                    {w.vehicle && ` · ${w.vehicle.licensePlate}`}
-                  </span>
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-1">
-                  <span
-                    className={cn("rounded-full px-2 py-0.5 text-xs font-medium", STATUS_BADGE_CLASSES[w.status])}
-                  >
-                    {STATUS_LABELS[w.status] ?? w.status}
-                  </span>
-                  <span className="text-xs font-medium text-foreground">
-                    {formatHuf(itemsTotal(w.items.map((i) => ({ quantity: i.quantity.toString(), unitPrice: i.unitPrice.toString() }))))}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </CardContent>
-        </Card>
+        <OpenWorkOrdersCard
+          isAdmin={session?.user?.role === "ADMIN"}
+          workOrders={openWorkOrders.map((w) => ({
+            id: w.id,
+            title: w.title,
+            status: w.status,
+            customer: w.customer,
+            vehicle: w.vehicle,
+            items: w.items.map((i) => ({ quantity: i.quantity.toString(), unitPrice: i.unitPrice.toString() })),
+          }))}
+        />
 
         <Card>
           <CardHeader>

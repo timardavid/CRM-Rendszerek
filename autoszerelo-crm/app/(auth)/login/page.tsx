@@ -37,6 +37,11 @@ export default function LoginPage() {
         toast.error("Hibás 2FA kód.");
         return;
       }
+      if (result?.code?.startsWith("ACCOUNT_LOCKED")) {
+        const minutes = result.code.split(":")[1] ?? "15";
+        toast.error(`Túl sok sikertelen próbálkozás. Próbáld újra kb. ${minutes} perc múlva.`);
+        return;
+      }
       if (result?.error) {
         toast.error("Hibás email vagy jelszó.");
         return;

@@ -6,6 +6,8 @@ import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity-log";
 
 const SESSION_AGE = 30 * 24 * 60 * 60;
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_MS = 15 * 60 * 1000;
 
 class TwoFactorRequiredError extends CredentialsSignin {
   code = "2FA_REQUIRED";
@@ -13,6 +15,33 @@ class TwoFactorRequiredError extends CredentialsSignin {
 
 class TwoFactorInvalidError extends CredentialsSignin {
   code = "2FA_INVALID";
+}
+
+class AccountLockedError extends CredentialsSignin {
+  constructor(minutesLeft: number) {
+    super();
+    this.code = `ACCOUNT_LOCKED:${minutesLeft}`;
+  }
+}
+
+async function registerFailedAttempt(userId: string, currentCount: number) {
+  const nextCount = currentCount + 1;
+  if (nextCount >= MAX_FAILED_ATTEMPTS) {
+    const user = await db.user.update({
+      where: { id: userId },
+      data: { failedLoginCount: 0, lockedUntil: new Date(Date.now() + LOCKOUT_MS) },
+    });
+    await logActivity({
+      userId: user.id,
+      userName: user.name,
+      action: "login_locked",
+      entityType: "User",
+      entityId: user.id,
+      details: `Fiók zárolva ${MAX_FAILED_ATTEMPTS} sikertelen bejelentkezési kísérlet után`,
+    });
+  } else {
+    await db.user.update({ where: { id: userId }, data: { failedLoginCount: nextCount } });
+  }
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -33,8 +62,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const user = await db.user.findUnique({ where: { email } });
         if (!user) return null;
 
+        if (user.lockedUntil && user.lockedUntil > new Date()) {
+          const minutesLeft = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
+          throw new AccountLockedError(minutesLeft);
+        }
+
         const validPassword = await bcrypt.compare(password, user.passwordHash);
-        if (!validPassword) return null;
+        if (!validPassword) {
+          await registerFailedAttempt(user.id, user.failedLoginCount);
+          return null;
+        }
 
         if (user.twoFactorEnabled) {
           const code = (credentials?.twoFactorCode as string | undefined ?? "").trim();
@@ -46,12 +83,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token: code,
             window: 2,
           });
-          if (!valid) throw new TwoFactorInvalidError();
+          if (!valid) {
+            await registerFailedAttempt(user.id, user.failedLoginCount);
+            throw new TwoFactorInvalidError();
+          }
         }
 
         await db.user.update({
           where: { id: user.id },
-          data: { lastLoginAt: new Date() },
+          data: { lastLoginAt: new Date(), failedLoginCount: 0, lockedUntil: null },
         });
 
         await logActivity({

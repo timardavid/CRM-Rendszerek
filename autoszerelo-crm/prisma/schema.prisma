@@ -20,6 +20,8 @@ model User {
   image            String?
   twoFactorSecret  String?
   twoFactorEnabled Boolean   @default(false)
+  failedLoginCount Int       @default(0)
+  lockedUntil      DateTime?
   lastLoginAt      DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt

@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 type LogParams = {
   userId?: string | null;
   userName: string;
-  action: "login" | "logout" | "create" | "update" | "delete" | "register";
+  action: "login" | "logout" | "create" | "update" | "delete" | "register" | "login_locked";
   entityType: string;
   entityId?: string | null;
   details?: string | null;

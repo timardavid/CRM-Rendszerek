@@ -16,7 +16,15 @@ export default async function SettingsPage() {
     db.user.findUnique({ where: { id: session!.user.id } }),
     db.settings.findUnique({ where: { id: "singleton" } }),
     db.user.findMany({
-      select: { id: true, name: true, email: true, role: true, twoFactorEnabled: true, lastLoginAt: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        twoFactorEnabled: true,
+        lastLoginAt: true,
+        lockedUntil: true,
+      },
       orderBy: { createdAt: "asc" },
     }),
   ]);
@@ -46,7 +54,11 @@ export default async function SettingsPage() {
         {isAdmin && (
           <TabsContent value="team">
             <TeamTab
-              members={members.map((m) => ({ ...m, lastLoginAt: m.lastLoginAt?.toISOString() ?? null }))}
+              members={members.map((m) => ({
+                ...m,
+                lastLoginAt: m.lastLoginAt?.toISOString() ?? null,
+                lockedUntil: m.lockedUntil?.toISOString() ?? null,
+              }))}
               currentUserId={session!.user.id}
             />
           </TabsContent>

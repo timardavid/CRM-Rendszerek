@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { SidebarNav, type NavCounts } from "@/components/sidebar-nav";
 import { SidebarSummary, type SidebarSummaryData } from "@/components/sidebar-summary";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -60,49 +61,66 @@ export function DashboardShell({ companyName, userName, userRole, navCounts, sum
         )}
       </aside>
 
-      {mobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 flex h-full w-64 flex-col border-r border-border bg-card">
-            <div className="flex items-center justify-between border-b border-border p-4">
-              <div className="min-w-0">
-                <p className="truncate font-semibold text-foreground">{companyName}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {userName} · {userRole === "ADMIN" ? "Admin" : "Munkatárs"}
-                </p>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <SidebarNav counts={navCounts} />
-            <div className="mt-auto">
-              <SidebarSummary summary={summary} />
-            </div>
-          </aside>
+      <div className="relative flex-1 overflow-hidden md:contents">
+        {/* Mobil: háttérben lévő menü, amit a tartalom "elhúzása" fed fel */}
+        <div className="fixed inset-0 z-0 flex flex-col bg-card md:hidden">
+          <div className="border-b border-border p-4 pt-6">
+            <p className="truncate font-semibold text-foreground">{companyName}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {userName} · {userRole === "ADMIN" ? "Admin" : "Munkatárs"}
+            </p>
+          </div>
+          <SidebarNav counts={navCounts} />
+          <div className="mt-auto">
+            <SidebarSummary summary={summary} />
+          </div>
         </div>
-      )}
 
-      <div className="flex min-h-screen flex-1 flex-col">
-        <header className="flex h-14 items-center justify-between gap-3 border-b border-border bg-card px-4">
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(true)}>
-            <Menu className="h-4 w-4" />
-          </Button>
-          <div className="hidden flex-1 md:block">
-            <GlobalSearch />
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/work-orders/new">
-              <Button size="sm">
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Új munkalap</span>
-              </Button>
-            </Link>
-            <ThemeToggle />
-            <LogoutButton />
-          </div>
-        </header>
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <motion.div
+          animate={
+            mobileOpen ? { x: 240, scale: 0.88, borderRadius: 24 } : { x: 0, scale: 1, borderRadius: 0 }
+          }
+          transition={{ type: "spring", stiffness: 280, damping: 28 }}
+          style={{ transformOrigin: "left center" }}
+          className="relative z-10 flex min-h-screen flex-1 flex-col bg-background"
+        >
+          <header className="flex h-14 items-center justify-between gap-3 border-b border-border bg-card px-4">
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen((o) => !o)}>
+              <motion.div
+                animate={{ rotate: mobileOpen ? 90 : 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              >
+                <Menu className="h-4 w-4" />
+              </motion.div>
+            </Button>
+            <div className="hidden flex-1 md:block">
+              <GlobalSearch />
+            </div>
+            <div className="flex items-center gap-2">
+              <Link href="/work-orders/new">
+                <Button size="sm">
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Új munkalap</span>
+                </Button>
+              </Link>
+              <ThemeToggle />
+              <LogoutButton />
+            </div>
+          </header>
+          <main className="flex-1 p-4 md:p-6">{children}</main>
+
+          <AnimatePresence>
+            {mobileOpen && (
+              <motion.div
+                className="absolute inset-0 z-20 md:hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileOpen(false)}
+              />
+            )}
+          </AnimatePresence>
+        </motion.div>
       </div>
     </div>
   );

@@ -71,25 +71,47 @@ export function CustomerFormDialog({ open, onOpenChange, title, initial, onSubmi
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="custName">Név *</Label>
-            <Input id="custName" value={values.name} onChange={(e) => set("name", e.target.value)} />
+            <Input
+              id="custName"
+              placeholder="pl. Kiss Péter"
+              value={values.name}
+              onChange={(e) => set("name", e.target.value)}
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="custPhone">Telefonszám</Label>
-            <Input id="custPhone" value={values.phone} onChange={(e) => set("phone", e.target.value)} />
+            <Input
+              id="custPhone"
+              placeholder="pl. +36 20 123 4567"
+              value={values.phone}
+              onChange={(e) => set("phone", e.target.value)}
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="custEmail">Email</Label>
-            <Input id="custEmail" type="email" value={values.email} onChange={(e) => set("email", e.target.value)} />
+            <Input
+              id="custEmail"
+              type="email"
+              placeholder="pl. nev@example.com"
+              value={values.email}
+              onChange={(e) => set("email", e.target.value)}
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="custAddress">Cím</Label>
-            <Input id="custAddress" value={values.address} onChange={(e) => set("address", e.target.value)} />
+            <Input
+              id="custAddress"
+              placeholder="pl. 1111 Budapest, Fő utca 1."
+              value={values.address}
+              onChange={(e) => set("address", e.target.value)}
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="custNotes">Megjegyzés</Label>
             <textarea
               id="custNotes"
-              className="min-h-20 rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
+              placeholder="pl. törzsvásárló, hívjuk előre, ha kész az autó"
+              className="min-h-20 rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
               value={values.notes}
               onChange={(e) => set("notes", e.target.value)}
             />

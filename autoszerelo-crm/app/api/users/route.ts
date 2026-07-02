@@ -9,7 +9,16 @@ export async function GET() {
   if (!session?.user) return NextResponse.json({ error: "Nincs bejelentkezve" }, { status: 401 });
 
   const users = await db.user.findMany({
-    select: { id: true, name: true, email: true, role: true, twoFactorEnabled: true, lastLoginAt: true, createdAt: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      twoFactorEnabled: true,
+      lastLoginAt: true,
+      createdAt: true,
+      lockedUntil: true,
+    },
     orderBy: { createdAt: "asc" },
   });
   return NextResponse.json({ users });

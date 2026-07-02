@@ -17,6 +17,7 @@ export type TeamMember = {
   role: "ADMIN" | "STAFF";
   twoFactorEnabled: boolean;
   lastLoginAt: string | null;
+  lockedUntil: string | null;
 };
 
 export function TeamTab({ members, currentUserId }: { members: TeamMember[]; currentUserId: string }) {
@@ -65,6 +66,16 @@ export function TeamTab({ members, currentUserId }: { members: TeamMember[]; cur
     router.refresh();
   }
 
+  async function handleUnlock(id: string) {
+    const res = await fetch(`/api/users/${id}/unlock`, { method: "POST" });
+    if (!res.ok) {
+      toast.error("Nem sikerült feloldani.");
+      return;
+    }
+    toast.success("Fiók feloldva.");
+    router.refresh();
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -72,26 +83,42 @@ export function TeamTab({ members, currentUserId }: { members: TeamMember[]; cur
           <CardTitle>Csapat</CardTitle>
           <CardDescription>
             A rendszerhez hozzáférő profilok. Az utolsó belépés oszlopból látod, ki mikor használta a rendszert
-            utoljára.
+            utoljára. 5 egymást követő sikertelen bejelentkezés után a fiók 15 percre automatikusan zárolódik —
+            itt tudod korábban is feloldani.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          {members.map((m) => (
-            <div key={m.id} className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm">
-              <div>
-                <p className="font-medium text-foreground">
-                  {m.name} <span className="text-muted-foreground">({m.role === "ADMIN" ? "admin" : "munkatárs"})</span>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {m.email} · 2FA: {m.twoFactorEnabled ? "be" : "ki"} · utolsó belépés:{" "}
-                  {m.lastLoginAt ? new Date(m.lastLoginAt).toLocaleString("hu-HU") : "még nem"}
-                </p>
+          {members.map((m) => {
+            const isLocked = m.lockedUntil && new Date(m.lockedUntil) > new Date();
+            return (
+              <div key={m.id} className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm">
+                <div>
+                  <p className="font-medium text-foreground">
+                    {m.name} <span className="text-muted-foreground">({m.role === "ADMIN" ? "admin" : "munkatárs"})</span>
+                    {isLocked && (
+                      <span className="ml-2 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                        Zárolva
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {m.email} · 2FA: {m.twoFactorEnabled ? "be" : "ki"} · utolsó belépés:{" "}
+                    {m.lastLoginAt ? new Date(m.lastLoginAt).toLocaleString("hu-HU") : "még nem"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  {isLocked && (
+                    <Button variant="outline" size="sm" onClick={() => handleUnlock(m.id)}>
+                      Feloldás
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="icon" onClick={() => setPendingDelete(m)} aria-label="Profil törlése">
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => setPendingDelete(m)} aria-label="Profil törlése">
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </div>
-          ))}
+            );
+          })}
         </CardContent>
       </Card>
 

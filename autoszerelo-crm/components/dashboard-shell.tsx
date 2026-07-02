@@ -73,7 +73,7 @@ export function DashboardShell({ companyName, userName, userRole, navCounts, sum
           </div>
           <SidebarNav counts={navCounts} onNavigate={() => setMobileOpen(false)} variant="mono" />
           <div className="mt-auto">
-            <SidebarSummary summary={summary} variant="mono" />
+            <SidebarSummary summary={summary} variant="mono" onNavigate={() => setMobileOpen(false)} />
           </div>
         </div>
 

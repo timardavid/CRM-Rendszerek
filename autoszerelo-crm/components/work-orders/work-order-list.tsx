@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { STATUS_LABELS, STATUS_ORDER, formatHuf, itemsTotal } from "@/lib/work-order";
+import { STATUS_LABELS, STATUS_ORDER, STATUS_BADGE_CLASSES, formatHuf, itemsTotal } from "@/lib/work-order";
+import { cn } from "@/lib/utils";
 
 export type WorkOrderSummary = {
   id: string;
@@ -60,14 +61,16 @@ export function WorkOrderList({ workOrders }: { workOrders: WorkOrderSummary[] }
           >
             <div className="flex items-center justify-between">
               <span className="font-medium text-foreground">{w.title}</span>
-              <span className="text-foreground">{formatHuf(itemsTotal(w.items))}</span>
+              <span className="font-medium text-foreground">{formatHuf(itemsTotal(w.items))}</span>
             </div>
-            <div className="flex items-center justify-between text-muted-foreground">
-              <span>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">
                 {w.customer.name}
                 {w.vehicle && ` · ${w.vehicle.licensePlate}`}
               </span>
-              <span>{STATUS_LABELS[w.status] ?? w.status}</span>
+              <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", STATUS_BADGE_CLASSES[w.status])}>
+                {STATUS_LABELS[w.status] ?? w.status}
+              </span>
             </div>
           </Link>
         ))}
@@ -95,8 +98,12 @@ export function WorkOrderList({ workOrders }: { workOrders: WorkOrderSummary[] }
                 </td>
                 <td className="px-3 py-2 text-foreground">{w.customer.name}</td>
                 <td className="px-3 py-2 text-muted-foreground">{w.vehicle?.licensePlate ?? "—"}</td>
-                <td className="px-3 py-2 text-muted-foreground">{STATUS_LABELS[w.status] ?? w.status}</td>
-                <td className="px-3 py-2 text-right text-foreground">{formatHuf(itemsTotal(w.items))}</td>
+                <td className="px-3 py-2">
+                  <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", STATUS_BADGE_CLASSES[w.status])}>
+                    {STATUS_LABELS[w.status] ?? w.status}
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-right font-medium text-foreground">{formatHuf(itemsTotal(w.items))}</td>
               </tr>
             ))}
           </tbody>

@@ -1,14 +1,7 @@
 import { db } from "@/lib/db";
 import { Card, CardContent } from "@/components/ui/card";
-
-const ACTION_LABELS: Record<string, string> = {
-  login: "Bejelentkezés",
-  logout: "Kijelentkezés",
-  register: "Regisztráció",
-  create: "Létrehozás",
-  update: "Módosítás",
-  delete: "Törlés",
-};
+import { activityIcon, activityIconColor, activitySentence } from "@/lib/activity-format";
+import { cn } from "@/lib/utils";
 
 export default async function ActivityPage() {
   const logs = await db.activityLog.findMany({
@@ -29,25 +22,30 @@ export default async function ActivityPage() {
         </Card>
       )}
 
-      {/* Mobil: kártyás lista */}
-      <div className="flex flex-col gap-2 md:hidden">
-        {logs.map((log) => (
-          <Card key={log.id}>
-            <CardContent className="flex flex-col gap-1 p-3 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-foreground">
-                  {log.userName} — {ACTION_LABELS[log.action] ?? log.action}
-                </span>
-                <span className="text-xs text-muted-foreground">{log.createdAt.toLocaleString("hu-HU")}</span>
-              </div>
-              <p className="text-muted-foreground">
-                {log.entityType}
-                {log.details ? ` · ${log.details}` : ""}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Mobil: egyszerű, elválasztott lista (nem külön kártyák egymás alatt) */}
+      {logs.length > 0 && (
+        <Card className="md:hidden">
+          <CardContent className="divide-y divide-border p-0">
+            {logs.map((log) => {
+              const Icon = activityIcon(log.action);
+              return (
+                <div key={log.id} className="flex items-center gap-3 p-3">
+                  <Icon className={cn("h-4 w-4 shrink-0", activityIconColor(log.action))} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm text-foreground">
+                      <span className="font-medium">{log.userName}</span> {activitySentence(log)}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {log.createdAt.toLocaleString("hu-HU")}
+                      {log.details ? ` · ${log.details}` : ""}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Asztali: táblázat */}
       {logs.length > 0 && (
@@ -59,25 +57,29 @@ export default async function ActivityPage() {
                   <tr>
                     <th className="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Időpont</th>
                     <th className="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Felhasználó</th>
-                    <th className="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Művelet</th>
-                    <th className="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Érintett elem</th>
+                    <th className="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Esemény</th>
                     <th className="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Részletek</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {logs.map((log) => (
-                    <tr key={log.id} className="border-t border-border">
-                      <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
-                        {log.createdAt.toLocaleString("hu-HU")}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-foreground">{log.userName}</td>
-                      <td className="whitespace-nowrap px-3 py-2 text-foreground">
-                        {ACTION_LABELS[log.action] ?? log.action}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-foreground">{log.entityType}</td>
-                      <td className="px-3 py-2 text-muted-foreground">{log.details ?? "—"}</td>
-                    </tr>
-                  ))}
+                  {logs.map((log) => {
+                    const Icon = activityIcon(log.action);
+                    return (
+                      <tr key={log.id} className="border-t border-border">
+                        <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
+                          {log.createdAt.toLocaleString("hu-HU")}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-foreground">{log.userName}</td>
+                        <td className="whitespace-nowrap px-3 py-2 text-foreground">
+                          <span className="flex items-center gap-2">
+                            <Icon className={cn("h-4 w-4 shrink-0", activityIconColor(log.action))} />
+                            {activitySentence(log)}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-muted-foreground">{log.details ?? "—"}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -144,7 +144,7 @@ export function ItemEditor({ items, onChange }: { items: ItemDraft[]; onChange: 
                   value={item.unitPrice}
                   onChange={(e) => update(index, { unitPrice: e.target.value })}
                 />
-                <span className="text-right text-sm text-muted-foreground">
+                <span className="text-right text-sm font-medium text-foreground">
                   {formatHuf(Number(item.quantity || 0) * Number(item.unitPrice || 0))}
                 </span>
                 <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(index)} aria-label="Tétel törlése">

@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { CustomerFormDialog, type CustomerFormValues } from "@/components/customers/customer-form-dialog";
 import { VehicleFormDialog, type VehicleFormValues } from "@/components/customers/vehicle-form-dialog";
-import { STATUS_LABELS } from "@/lib/work-order";
+import { STATUS_LABELS, STATUS_BADGE_CLASSES } from "@/lib/work-order";
+import { cn } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
 export type CustomerDetailData = {
@@ -193,7 +194,9 @@ export function CustomerDetail({ customer, isAdmin }: { customer: CustomerDetail
                 <span className="text-foreground">
                   {w.title} {w.vehicle && <span className="text-muted-foreground">({w.vehicle.licensePlate})</span>}
                 </span>
-                <span className="text-muted-foreground">{STATUS_LABELS[w.status] ?? w.status}</span>
+                <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", STATUS_BADGE_CLASSES[w.status])}>
+                  {STATUS_LABELS[w.status] ?? w.status}
+                </span>
               </Link>
             ))}
           </CardContent>

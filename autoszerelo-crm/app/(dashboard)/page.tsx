@@ -3,8 +3,10 @@ import { AlertTriangle, Clock } from "lucide-react";
 import { db } from "@/lib/db";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Wrench, Users, Activity, Banknote } from "lucide-react";
-import { STATUS_LABELS, formatHuf } from "@/lib/work-order";
+import { STATUS_LABELS, STATUS_BADGE_CLASSES, formatHuf, itemsTotal } from "@/lib/work-order";
 import { startOfToday, startOfMonth } from "@/lib/date";
+import { activityIcon, activityIconColor, activitySentence } from "@/lib/activity-format";
+import { cn } from "@/lib/utils";
 
 const STALE_DAYS = 5;
 
@@ -24,7 +26,11 @@ export default async function OverviewPage() {
   ] = await Promise.all([
     db.workOrder.findMany({
       where: { status: { not: "HANDED_OVER" } },
-      include: { customer: { select: { name: true } }, vehicle: { select: { licensePlate: true } } },
+      include: {
+        customer: { select: { name: true } },
+        vehicle: { select: { licensePlate: true } },
+        items: { select: { quantity: true, unitPrice: true } },
+      },
       orderBy: { createdAt: "desc" },
       take: 6,
     }),
@@ -113,7 +119,9 @@ export default async function OverviewPage() {
                     <span className="text-foreground">
                       {w.title} <span className="text-muted-foreground">({w.customer.name})</span>
                     </span>
-                    <span className="text-muted-foreground">{STATUS_LABELS[w.status] ?? w.status}</span>
+                    <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", STATUS_BADGE_CLASSES[w.status])}>
+                      {STATUS_LABELS[w.status] ?? w.status}
+                    </span>
                   </Link>
                 ))}
               </div>
@@ -156,12 +164,26 @@ export default async function OverviewPage() {
               <Link
                 key={w.id}
                 href={`/work-orders/${w.id}`}
-                className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm hover:bg-muted"
+                className="flex items-center gap-3 rounded-md border border-border px-3 py-2.5 text-sm hover:bg-muted"
               >
-                <span className="text-foreground">
-                  {w.title} <span className="text-muted-foreground">({w.customer.name})</span>
-                </span>
-                <span className="text-muted-foreground">{STATUS_LABELS[w.status] ?? w.status}</span>
+                <Wrench className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate font-medium text-foreground">{w.title}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {w.customer.name}
+                    {w.vehicle && ` · ${w.vehicle.licensePlate}`}
+                  </span>
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <span
+                    className={cn("rounded-full px-2 py-0.5 text-xs font-medium", STATUS_BADGE_CLASSES[w.status])}
+                  >
+                    {STATUS_LABELS[w.status] ?? w.status}
+                  </span>
+                  <span className="text-xs font-medium text-foreground">
+                    {formatHuf(itemsTotal(w.items.map((i) => ({ quantity: i.quantity.toString(), unitPrice: i.unitPrice.toString() }))))}
+                  </span>
+                </div>
               </Link>
             ))}
           </CardContent>
@@ -172,16 +194,22 @@ export default async function OverviewPage() {
             <CardTitle>Legutóbbi aktivitás</CardTitle>
             <CardDescription>Ki mit csinált a rendszerben.</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-2">
+          <CardContent className="flex flex-col gap-1">
             {recentActivity.length === 0 && <p className="text-sm text-muted-foreground">Még nincs rögzített aktivitás.</p>}
-            {recentActivity.map((log) => (
-              <div key={log.id} className="flex items-center justify-between text-sm">
-                <span className="text-foreground">
-                  <span className="font-medium">{log.userName}</span> — {log.action} ({log.entityType})
-                </span>
-                <span className="text-muted-foreground">{log.createdAt.toLocaleString("hu-HU")}</span>
-              </div>
-            ))}
+            {recentActivity.map((log) => {
+              const Icon = activityIcon(log.action);
+              return (
+                <div key={log.id} className="flex items-center gap-3 rounded-md px-1 py-1.5 text-sm">
+                  <Icon className={cn("h-4 w-4 shrink-0", activityIconColor(log.action))} />
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-foreground">
+                      <span className="font-medium">{log.userName}</span> {activitySentence(log)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{log.createdAt.toLocaleString("hu-HU")}</span>
+                  </div>
+                </div>
+              );
+            })}
             <Link href="/activity" className="mt-2 text-sm text-primary underline">
               Teljes napló megtekintése
             </Link>

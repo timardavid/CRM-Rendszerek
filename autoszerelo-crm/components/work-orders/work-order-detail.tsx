@@ -261,7 +261,8 @@ export function WorkOrderDetail({ workOrder, isAdmin }: { workOrder: WorkOrderDa
                     {inv.type === "QUOTE" ? "Árajánlat" : "Számla"} #{inv.number}
                   </span>
                   <span className="text-muted-foreground">
-                    {formatHuf(Number(inv.totalAmount))} · {new Date(inv.issuedAt).toLocaleDateString("hu-HU")}
+                    <span className="font-medium text-foreground">{formatHuf(Number(inv.totalAmount))}</span> ·{" "}
+                    {new Date(inv.issuedAt).toLocaleDateString("hu-HU")}
                   </span>
                 </Link>
               ))}

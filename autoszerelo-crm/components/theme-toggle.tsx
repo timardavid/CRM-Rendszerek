@@ -20,7 +20,7 @@ export function ThemeToggle() {
 
   if (!hasMounted) return <Button variant="ghost" size="icon" />;
 
-  const TriggerIcon = autoSchedule ? Clock : resolvedTheme === "dark" ? Moon : Sun;
+  const TriggerIcon = resolvedTheme === "dark" ? Moon : Sun;
 
   function choose(mode: "light" | "dark" | "system") {
     setAutoSchedule(false);

@@ -1,9 +1,15 @@
 import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
+import GitHub from "next-auth/providers/github";
 import bcrypt from "bcryptjs";
 import speakeasy from "speakeasy";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity-log";
+import { claimBootstrapAdmin } from "@/lib/bootstrap";
+import { oauthProviders } from "@/lib/oauth-config";
+
+const OAUTH_PROVIDERS = new Set(["google", "github"]);
 
 const SESSION_AGE = 30 * 24 * 60 * 60;
 const MAX_FAILED_ATTEMPTS = 5;
@@ -110,12 +116,49 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         };
       },
     }),
+    ...(oauthProviders.google
+      ? [Google({ clientId: process.env.GOOGLE_CLIENT_ID!, clientSecret: process.env.GOOGLE_CLIENT_SECRET! })]
+      : []),
+    ...(oauthProviders.github
+      ? [GitHub({ clientId: process.env.GITHUB_CLIENT_ID!, clientSecret: process.env.GITHUB_CLIENT_SECRET! })]
+      : []),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async signIn({ user, account }) {
+      if (!account || !OAUTH_PROVIDERS.has(account.provider)) return true;
+
+      const email = user.email?.toLowerCase().trim();
+      if (!email) return false;
+
+      const existing = await db.user.findUnique({ where: { email } });
+      if (existing) return true;
+
+      // No matching account yet — only allow this to create the very first
+      // (bootstrap) admin. Once the system has an admin, unknown OAuth
+      // emails are rejected, matching the closed-access model of Credentials
+      // registration.
+      const userCount = await db.user.count();
+      if (userCount > 0) return false;
+
+      const created = await claimBootstrapAdmin({
+        name: user.name ?? email,
+        email,
+        companyName: user.name ?? "CRM",
+      });
+      return created !== null;
+    },
+    async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
+        if (account && OAUTH_PROVIDERS.has(account.provider)) {
+          const dbUser = await db.user.findUnique({ where: { email: user.email!.toLowerCase().trim() } });
+          if (dbUser) {
+            token.id = dbUser.id;
+            token.role = dbUser.role;
+          }
+        } else {
+          token.id = user.id;
+          token.role = user.role;
+        }
       }
       return token;
     },
@@ -123,6 +166,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.id = token.id;
       session.user.role = token.role;
       return session;
+    },
+  },
+  events: {
+    async signIn({ user, account }) {
+      if (!account || !OAUTH_PROVIDERS.has(account.provider)) return;
+      const email = user.email?.toLowerCase().trim();
+      if (!email) return;
+
+      const dbUser = await db.user.findUnique({ where: { email } });
+      if (!dbUser) return;
+
+      await db.user.update({ where: { id: dbUser.id }, data: { lastLoginAt: new Date() } });
+      await logActivity({
+        userId: dbUser.id,
+        userName: dbUser.name,
+        action: "login",
+        entityType: "User",
+        entityId: dbUser.id,
+        details: `Bejelentkezve: ${account.provider === "google" ? "Google" : "GitHub"}`,
+      });
     },
   },
   pages: { signIn: "/login" },

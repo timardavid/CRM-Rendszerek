@@ -32,7 +32,7 @@ export type InvoiceData = {
   };
 };
 
-export function InvoiceView({ invoice }: { invoice: InvoiceData }) {
+export function InvoiceView({ invoice, isAdmin }: { invoice: InvoiceData; isAdmin: boolean }) {
   const router = useRouter();
   const [paid, setPaid] = useState(Boolean(invoice.paidAt));
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -80,9 +80,11 @@ export function InvoiceView({ invoice }: { invoice: InvoiceData }) {
           <Button variant="outline" onClick={() => window.print()}>
             <Printer className="h-4 w-4" /> Nyomtatás / PDF mentés
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => setDeleteOpen(true)} aria-label="Törlés">
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
+          {isAdmin && (
+            <Button variant="ghost" size="icon" onClick={() => setDeleteOpen(true)} aria-label="Törlés">
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          )}
         </div>
       </div>
 

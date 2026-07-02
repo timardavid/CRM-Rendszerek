@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
+import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { WorkOrderDetail } from "@/components/work-orders/work-order-detail";
 
 export default async function WorkOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const session = await auth();
 
   const workOrder = await db.workOrder.findUnique({
     where: { id },
@@ -19,6 +21,7 @@ export default async function WorkOrderDetailPage({ params }: { params: Promise<
 
   return (
     <WorkOrderDetail
+      isAdmin={session?.user?.role === "ADMIN"}
       workOrder={{
         id: workOrder.id,
         title: workOrder.title,

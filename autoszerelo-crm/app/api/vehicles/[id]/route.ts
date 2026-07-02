@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity-log";
+import { requireAdmin } from "@/lib/authz";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -38,7 +39,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
-  if (!session) return NextResponse.json({ error: "Nincs bejelentkezve" }, { status: 401 });
+  const forbidden = requireAdmin(session, "Csak admin törölhet járművet.");
+  if (forbidden) return forbidden;
 
   const { id } = await params;
   const vehicle = await db.vehicle.findUnique({ where: { id } });
@@ -47,8 +49,8 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   await db.vehicle.delete({ where: { id } });
 
   await logActivity({
-    userId: session.user.id,
-    userName: session.user.name ?? "Ismeretlen",
+    userId: session!.user.id,
+    userName: session!.user.name ?? "Ismeretlen",
     action: "delete",
     entityType: "Vehicle",
     entityId: id,

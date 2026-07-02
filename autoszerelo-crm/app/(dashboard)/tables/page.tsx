@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { TableList } from "@/components/tables/table-list";
 import { Plus } from "lucide-react";
 
 export default async function TablesPage() {
+  const session = await auth();
   const tables = await db.customTable.findMany({
     include: { _count: { select: { rows: true } } },
     orderBy: { createdAt: "asc" },
@@ -26,6 +28,7 @@ export default async function TablesPage() {
       </p>
 
       <TableList
+        isAdmin={session?.user?.role === "ADMIN"}
         tables={tables.map((t) => ({
           id: t.id,
           name: t.name,

@@ -62,17 +62,17 @@ export function DashboardShell({ companyName, userName, userRole, navCounts, sum
       </aside>
 
       <div className="relative flex-1 overflow-hidden md:contents">
-        {/* Mobil: háttérben lévő menü, amit a tartalom "elhúzása" fed fel */}
-        <div className="fixed inset-0 z-0 flex flex-col bg-card md:hidden">
-          <div className="border-b border-border p-4 pt-6">
-            <p className="truncate font-semibold text-foreground">{companyName}</p>
-            <p className="truncate text-xs text-muted-foreground">
+        {/* Mobil: háttérben lévő menü, amit a tartalom "elhúzása" fed fel — mindig sötét, függetlenül a világos/sötét témától */}
+        <div className="fixed inset-0 z-0 flex flex-col bg-black md:hidden">
+          <div className="border-b border-white/10 p-4 pt-6">
+            <p className="truncate font-semibold text-white">{companyName}</p>
+            <p className="truncate text-xs text-white/50">
               {userName} · {userRole === "ADMIN" ? "Admin" : "Munkatárs"}
             </p>
           </div>
-          <SidebarNav counts={navCounts} />
+          <SidebarNav counts={navCounts} onNavigate={() => setMobileOpen(false)} variant="mono" />
           <div className="mt-auto">
-            <SidebarSummary summary={summary} />
+            <SidebarSummary summary={summary} variant="mono" />
           </div>
         </div>
 

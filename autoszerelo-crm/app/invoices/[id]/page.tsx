@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { InvoiceView } from "@/components/invoices/invoice-view";
 
@@ -6,6 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const session = await auth();
 
   const [invoice, settings] = await Promise.all([
     db.invoice.findUnique({
@@ -26,6 +28,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
 
   return (
     <InvoiceView
+      isAdmin={session?.user?.role === "ADMIN"}
       invoice={{
         id: invoice.id,
         number: invoice.number,

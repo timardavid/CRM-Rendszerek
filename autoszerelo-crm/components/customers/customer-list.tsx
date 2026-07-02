@@ -19,7 +19,7 @@ export type CustomerSummary = {
   workOrderCount: number;
 };
 
-export function CustomerList({ customers }: { customers: CustomerSummary[] }) {
+export function CustomerList({ customers, isAdmin }: { customers: CustomerSummary[]; isAdmin: boolean }) {
   const router = useRouter();
   const [addOpen, setAddOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<CustomerSummary | null>(null);
@@ -78,11 +78,13 @@ export function CustomerList({ customers }: { customers: CustomerSummary[] }) {
                   {c.vehicleCount} jármű · {c.workOrderCount} munkalap
                 </span>
               </Link>
-              <div className="flex justify-end">
-                <Button variant="ghost" size="icon" onClick={() => setPendingDelete(c)} aria-label="Ügyfél törlése">
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
+              {isAdmin && (
+                <div className="flex justify-end">
+                  <Button variant="ghost" size="icon" onClick={() => setPendingDelete(c)} aria-label="Ügyfél törlése">
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}

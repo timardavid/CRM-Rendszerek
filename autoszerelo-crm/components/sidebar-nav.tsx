@@ -21,8 +21,19 @@ const links = [
   { href: "/settings", label: "Beállítások", icon: Settings, countKey: undefined },
 ];
 
-export function SidebarNav({ counts, collapsed = false }: { counts?: NavCounts; collapsed?: boolean }) {
+export function SidebarNav({
+  counts,
+  collapsed = false,
+  onNavigate,
+  variant = "default",
+}: {
+  counts?: NavCounts;
+  collapsed?: boolean;
+  onNavigate?: () => void;
+  variant?: "default" | "mono";
+}) {
   const pathname = usePathname();
+  const mono = variant === "mono";
 
   return (
     <nav className="flex flex-col gap-1 p-3">
@@ -33,11 +44,18 @@ export function SidebarNav({ counts, collapsed = false }: { counts?: NavCounts; 
           <Link
             key={href}
             href={href}
+            onClick={onNavigate}
             title={collapsed ? label : undefined}
             className={cn(
               "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
               collapsed && "justify-center px-0",
-              active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              mono
+                ? active
+                  ? "bg-white/15 text-white"
+                  : "text-white/60 hover:bg-white/10 hover:text-white"
+                : active
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
             <Icon className="h-4 w-4 shrink-0" />
@@ -48,7 +66,11 @@ export function SidebarNav({ counts, collapsed = false }: { counts?: NavCounts; 
                   <span
                     className={cn(
                       "rounded-full px-2 py-0.5 text-xs font-semibold",
-                      active ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
+                      mono
+                        ? "bg-white/20 text-white"
+                        : active
+                          ? "bg-primary-foreground/20 text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
                     )}
                   >
                     {count}

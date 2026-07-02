@@ -7,16 +7,19 @@ export const dynamic = "force-dynamic";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  const [settings, openWorkOrderCount, customerCount, todayActivityCount, monthlyPaidInvoices] = await Promise.all([
-    db.settings.findUnique({ where: { id: "singleton" } }).catch(() => null),
-    db.workOrder.count({ where: { status: { not: "HANDED_OVER" } } }),
-    db.customer.count(),
-    db.activityLog.count({ where: { createdAt: { gte: startOfToday() } } }),
-    db.invoice.findMany({
-      where: { type: "INVOICE", paidAt: { gte: startOfMonth() } },
-      select: { totalAmount: true },
-    }),
-  ]);
+  const now = new Date();
+  const [settings, openWorkOrderCount, customerCount, todayActivityCount, monthlyPaidInvoices, upcomingAppointmentCount] =
+    await Promise.all([
+      db.settings.findUnique({ where: { id: "singleton" } }).catch(() => null),
+      db.workOrder.count({ where: { status: { not: "HANDED_OVER" } } }),
+      db.customer.count(),
+      db.activityLog.count({ where: { createdAt: { gte: startOfToday() } } }),
+      db.invoice.findMany({
+        where: { type: "INVOICE", paidAt: { gte: startOfMonth() } },
+        select: { totalAmount: true },
+      }),
+      db.workOrder.count({ where: { scheduledAt: { gte: now }, status: { not: "HANDED_OVER" } } }),
+    ]);
 
   const companyName = settings?.companyName ?? "CRM";
   const accentColor = settings?.accentColor ?? "#2563eb";
@@ -29,7 +32,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
         userName={session?.user?.name ?? ""}
         userRole={session?.user?.role ?? "STAFF"}
         navCounts={{ workOrders: openWorkOrderCount, customers: customerCount }}
-        summary={{ openWorkOrders: openWorkOrderCount, todayActivity: todayActivityCount, monthlyRevenue }}
+        summary={{
+          openWorkOrders: openWorkOrderCount,
+          todayActivity: todayActivityCount,
+          monthlyRevenue,
+          customers: customerCount,
+          upcomingAppointments: upcomingAppointmentCount,
+        }}
       >
         {children}
       </DashboardShell>

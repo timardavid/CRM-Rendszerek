@@ -17,7 +17,7 @@ type TableSummary = {
   rowCount: number;
 };
 
-export function TableList({ tables }: { tables: TableSummary[] }) {
+export function TableList({ tables, isAdmin }: { tables: TableSummary[]; isAdmin: boolean }) {
   const router = useRouter();
   const [pendingDelete, setPendingDelete] = useState<TableSummary | null>(null);
 
@@ -47,11 +47,13 @@ export function TableList({ tables }: { tables: TableSummary[] }) {
                 {t.description && <span className="text-sm text-muted-foreground">{t.description}</span>}
                 <span className="text-xs text-muted-foreground">{t.rowCount} rekord</span>
               </Link>
-              <div className="flex justify-end">
-                <Button variant="ghost" size="icon" onClick={() => setPendingDelete(t)} aria-label="Tábla törlése">
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
+              {isAdmin && (
+                <div className="flex justify-end">
+                  <Button variant="ghost" size="icon" onClick={() => setPendingDelete(t)} aria-label="Tábla törlése">
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}

@@ -30,7 +30,7 @@ export type CustomerDetailData = {
   }[];
 };
 
-export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
+export function CustomerDetail({ customer, isAdmin }: { customer: CustomerDetailData; isAdmin: boolean }) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteCustomerOpen, setDeleteCustomerOpen] = useState(false);
@@ -119,9 +119,11 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
           <Button variant="ghost" size="icon" onClick={() => setEditOpen(true)} aria-label="Ügyfél szerkesztése">
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => setDeleteCustomerOpen(true)} aria-label="Ügyfél törlése">
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
+          {isAdmin && (
+            <Button variant="ghost" size="icon" onClick={() => setDeleteCustomerOpen(true)} aria-label="Ügyfél törlése">
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -157,9 +159,11 @@ export function CustomerDetail({ customer }: { customer: CustomerDetailData }) {
                   <Button variant="ghost" size="icon" onClick={() => setEditVehicle(v)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => setDeleteVehicle(v)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  {isAdmin && (
+                    <Button variant="ghost" size="icon" onClick={() => setDeleteVehicle(v)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}

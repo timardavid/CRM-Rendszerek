@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity-log";
+import { isValidEmail } from "@/lib/validate";
 
 export async function PATCH(req: Request) {
   const session = await auth();
@@ -17,7 +18,12 @@ export async function PATCH(req: Request) {
   const data: { name?: string; email?: string; passwordHash?: string } = {};
 
   if (name) data.name = name;
-  if (email) data.email = String(email).toLowerCase().trim();
+  if (email) {
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ error: "Érvénytelen email cím." }, { status: 400 });
+    }
+    data.email = String(email).toLowerCase().trim();
+  }
 
   if (newPassword) {
     if (!currentPassword) {

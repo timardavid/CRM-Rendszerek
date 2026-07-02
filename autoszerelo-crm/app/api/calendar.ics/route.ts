@@ -1,12 +1,20 @@
+import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { buildIcsCalendar } from "@/lib/ics";
+
+function tokensMatch(a: string, b: string) {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
 
 export async function GET(req: Request) {
   const token = new URL(req.url).searchParams.get("token");
   const settings = await db.settings.findUnique({ where: { id: "singleton" } });
 
-  if (!settings?.calendarToken || token !== settings.calendarToken) {
+  if (!settings?.calendarToken || !token || !tokensMatch(token, settings.calendarToken)) {
     return NextResponse.json({ error: "Érvénytelen vagy hiányzó token." }, { status: 401 });
   }
 

@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/activity-log";
+import { isValidEmail } from "@/lib/validate";
 
 export async function GET() {
   const session = await auth();
@@ -35,6 +36,9 @@ export async function POST(req: Request) {
 
   if (!name || !email || !password) {
     return NextResponse.json({ error: "Minden mező kitöltése kötelező." }, { status: 400 });
+  }
+  if (!isValidEmail(email)) {
+    return NextResponse.json({ error: "Érvénytelen email cím." }, { status: 400 });
   }
   if (password.length < 8) {
     return NextResponse.json({ error: "A jelszónak legalább 8 karakternek kell lennie." }, { status: 400 });

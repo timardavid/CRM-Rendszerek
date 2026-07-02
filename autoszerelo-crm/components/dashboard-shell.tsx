@@ -34,7 +34,14 @@ export function DashboardShell({ companyName, userName, userRole, navCounts, sum
         )}
       >
         <div className="flex items-center justify-between border-b border-border p-4">
-          {!collapsed && <p className="truncate font-semibold text-foreground">{companyName}</p>}
+          {!collapsed && (
+            <div className="min-w-0">
+              <p className="truncate font-semibold text-foreground">{companyName}</p>
+              <p className="truncate text-xs text-muted-foreground">
+                {userName} · {userRole === "ADMIN" ? "Admin" : "Munkatárs"}
+              </p>
+            </div>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -58,7 +65,12 @@ export function DashboardShell({ companyName, userName, userRole, navCounts, sum
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
           <aside className="absolute left-0 top-0 flex h-full w-64 flex-col border-r border-border bg-card">
             <div className="flex items-center justify-between border-b border-border p-4">
-              <p className="truncate font-semibold text-foreground">{companyName}</p>
+              <div className="min-w-0">
+                <p className="truncate font-semibold text-foreground">{companyName}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {userName} · {userRole === "ADMIN" ? "Admin" : "Munkatárs"}
+                </p>
+              </div>
               <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)}>
                 <X className="h-4 w-4" />
               </Button>
@@ -86,10 +98,6 @@ export function DashboardShell({ companyName, userName, userRole, navCounts, sum
                 <span className="hidden sm:inline">Új munkalap</span>
               </Button>
             </Link>
-            <div className="mr-2 hidden text-right text-sm leading-tight sm:block">
-              <p className="font-medium text-foreground">{userName}</p>
-              <p className="text-xs text-muted-foreground">{userRole === "ADMIN" ? "Admin" : "Munkatárs"}</p>
-            </div>
             <ThemeToggle />
             <LogoutButton />
           </div>

@@ -1,13 +1,11 @@
 import Link from "next/link";
-import { Wrench, Activity, Banknote, Users, CalendarClock } from "lucide-react";
+import { Activity, Banknote, CalendarClock } from "lucide-react";
 import { formatHuf } from "@/lib/work-order";
 import { cn } from "@/lib/utils";
 
 export type SidebarSummaryData = {
-  openWorkOrders: number;
   todayActivity: number;
   monthlyRevenue: number;
-  customers: number;
   upcomingAppointments: number;
 };
 
@@ -23,8 +21,6 @@ export function SidebarSummary({
   const mono = variant === "mono";
 
   const rows = [
-    { label: "Ügyfelek", value: summary.customers, icon: Users, href: "/customers" },
-    { label: "Nyitott munkalap", value: summary.openWorkOrders, icon: Wrench, href: "/work-orders" },
     { label: "Közelgő időpont", value: summary.upcomingAppointments, icon: CalendarClock, href: "/calendar" },
     { label: "Mai aktivitás", value: summary.todayActivity, icon: Activity, href: "/activity" },
     { label: "Havi bevétel", value: formatHuf(summary.monthlyRevenue), icon: Banknote, href: "/reports" },

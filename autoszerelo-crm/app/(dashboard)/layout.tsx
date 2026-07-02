@@ -33,10 +33,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         userRole={session?.user?.role ?? "STAFF"}
         navCounts={{ workOrders: openWorkOrderCount, customers: customerCount }}
         summary={{
-          openWorkOrders: openWorkOrderCount,
           todayActivity: todayActivityCount,
           monthlyRevenue,
-          customers: customerCount,
           upcomingAppointments: upcomingAppointmentCount,
         }}
       >

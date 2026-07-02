@@ -31,7 +31,7 @@ export function DashboardShell({ companyName, userName, userRole, navCounts, sum
     <div className="flex min-h-screen w-full">
       <aside
         className={cn(
-          "hidden shrink-0 border-r border-border bg-card transition-[width] duration-150 md:flex md:flex-col",
+          "sticky top-0 hidden h-screen shrink-0 overflow-y-auto border-r border-border bg-card transition-[width] duration-150 md:flex md:flex-col",
           collapsed ? "w-16" : "w-64"
         )}
       >

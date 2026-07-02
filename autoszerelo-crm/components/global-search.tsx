@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 type SearchResults = {
   customers: { id: string; name: string; phone: string | null }[];
@@ -13,7 +14,7 @@ type SearchResults = {
 
 const EMPTY: SearchResults = { customers: [], vehicles: [], workOrders: [] };
 
-export function GlobalSearch() {
+export function GlobalSearch({ autoFocus, fullWidth }: { autoFocus?: boolean; fullWidth?: boolean } = {}) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResults>(EMPTY);
@@ -46,10 +47,11 @@ export function GlobalSearch() {
   const hasResults = results.customers.length + results.vehicles.length + results.workOrders.length > 0;
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-sm">
+    <div ref={containerRef} className={cn("relative w-full", !fullWidth && "max-w-sm")}>
       <div className="relative">
         <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
+          autoFocus={autoFocus}
           placeholder="Keresés: ügyfél, rendszám, munka…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

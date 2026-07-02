@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Menu, Plus, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { SidebarNav, type NavCounts } from "@/components/sidebar-nav";
 import { SidebarSummary, type SidebarSummaryData } from "@/components/sidebar-summary";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -24,6 +24,7 @@ type Props = {
 
 export function DashboardShell({ companyName, userName, userRole, navCounts, summary, children }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [collapsed, toggleCollapsed] = useSidebarCollapsed();
 
   return (
@@ -84,29 +85,49 @@ export function DashboardShell({ companyName, userName, userRole, navCounts, sum
           style={{ transformOrigin: "left center" }}
           className="relative z-10 flex min-h-screen flex-1 flex-col bg-background"
         >
-          <header className="flex h-14 items-center justify-between gap-3 border-b border-border bg-card px-4">
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen((o) => !o)}>
-              <motion.div
-                animate={{ rotate: mobileOpen ? 90 : 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              >
-                <Menu className="h-4 w-4" />
-              </motion.div>
-            </Button>
-            <div className="hidden flex-1 md:block">
-              <GlobalSearch />
+          {mobileSearchOpen ? (
+            <div className="flex h-14 items-center gap-2 border-b border-border bg-card px-4 md:hidden">
+              <div className="flex-1">
+                <GlobalSearch autoFocus fullWidth />
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setMobileSearchOpen(false)} aria-label="Keresés bezárása">
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-            <div className="flex items-center gap-2">
-              <Link href="/work-orders/new">
-                <Button size="sm">
-                  <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline">Új munkalap</span>
+          ) : (
+            <header className="flex h-14 items-center justify-between gap-3 border-b border-border bg-card px-4">
+              <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen((o) => !o)}>
+                <motion.div
+                  animate={{ rotate: mobileOpen ? 90 : 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                >
+                  <Menu className="h-4 w-4" />
+                </motion.div>
+              </Button>
+              <div className="hidden flex-1 md:block">
+                <GlobalSearch />
+              </div>
+              <div className="flex flex-1 items-center justify-end gap-2 md:flex-none">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden"
+                  onClick={() => setMobileSearchOpen(true)}
+                  aria-label="Keresés"
+                >
+                  <Search className="h-4 w-4" />
                 </Button>
-              </Link>
-              <ThemeToggle />
-              <LogoutButton />
-            </div>
-          </header>
+                <Link href="/work-orders/new">
+                  <Button size="sm">
+                    <Plus className="h-4 w-4" />
+                    <span className="hidden sm:inline">Új munkalap</span>
+                  </Button>
+                </Link>
+                <ThemeToggle />
+                <LogoutButton />
+              </div>
+            </header>
+          )}
           <main className="flex-1 p-4 md:p-6">{children}</main>
 
           <AnimatePresence>

@@ -55,7 +55,45 @@ export default async function CalendarPage({
         </Link>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Mobil: napok szerint csoportosított lista, csak a foglalt napok */}
+      <div className="flex flex-col gap-3 md:hidden">
+        {workOrders.length === 0 && (
+          <p className="text-sm text-muted-foreground">Ebben a hónapban nincs beütemezett munka.</p>
+        )}
+        {weeks
+          .flat()
+          .filter((day) => day.getMonth() === month)
+          .map((day) => {
+            const dayOrders = workOrders.filter((w) => w.scheduledAt && isSameDay(w.scheduledAt, day));
+            if (dayOrders.length === 0) return null;
+            const isToday = isSameDay(day, today);
+            return (
+              <div key={day.toISOString()} className="flex flex-col gap-2">
+                <p className={`text-sm font-medium ${isToday ? "text-primary" : "text-foreground"}`}>
+                  {day.toLocaleDateString("hu-HU", { weekday: "long", month: "long", day: "numeric" })}
+                  {isToday && " · ma"}
+                </p>
+                {dayOrders.map((w) => (
+                  <Link
+                    key={w.id}
+                    href={`/work-orders/${w.id}`}
+                    className="flex items-center justify-between rounded-lg border border-border p-3 text-sm hover:bg-muted"
+                  >
+                    <span className="text-foreground">
+                      {w.title} <span className="text-muted-foreground">({w.customer.name})</span>
+                    </span>
+                    <span className="text-muted-foreground">
+                      {w.scheduledAt?.toLocaleTimeString("hu-HU", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            );
+          })}
+      </div>
+
+      {/* Asztali: hónap-rács nézet */}
+      <div className="hidden overflow-x-auto md:block">
         <div className="grid min-w-[700px] grid-cols-7 gap-px rounded-md border border-border bg-border">
           {WEEKDAY_LABELS.map((label) => (
             <div key={label} className="bg-muted p-2 text-center text-xs font-medium text-muted-foreground">

@@ -50,7 +50,31 @@ export function WorkOrderList({ workOrders }: { workOrders: WorkOrderSummary[] }
 
       {filtered.length === 0 && <p className="text-sm text-muted-foreground">Nincs ilyen munkalap.</p>}
 
-      <div className="overflow-x-auto rounded-lg border border-border">
+      {/* Mobil: kártyás lista */}
+      <div className="flex flex-col gap-2 md:hidden">
+        {filtered.map((w) => (
+          <Link
+            key={w.id}
+            href={`/work-orders/${w.id}`}
+            className="flex flex-col gap-1 rounded-lg border border-border p-3 text-sm hover:bg-muted"
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-foreground">{w.title}</span>
+              <span className="text-foreground">{formatHuf(itemsTotal(w.items))}</span>
+            </div>
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span>
+                {w.customer.name}
+                {w.vehicle && ` · ${w.vehicle.licensePlate}`}
+              </span>
+              <span>{STATUS_LABELS[w.status] ?? w.status}</span>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Asztali: táblázat */}
+      <div className="hidden overflow-x-auto rounded-lg border border-border md:block">
         <table className="w-full text-sm">
           <thead className="bg-muted">
             <tr>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Table2, Activity, Settings, Users, Wrench, CalendarDays } from "lucide-react";
+import { LayoutDashboard, Table2, Activity, Settings, Users, Wrench, CalendarDays, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type NavCounts = {
@@ -15,6 +15,7 @@ const links = [
   { href: "/customers", label: "Ügyfelek", icon: Users, countKey: "customers" as const },
   { href: "/work-orders", label: "Munkalapok", icon: Wrench, countKey: "workOrders" as const },
   { href: "/calendar", label: "Naptár", icon: CalendarDays, countKey: undefined },
+  { href: "/reports", label: "Riportok", icon: BarChart3, countKey: undefined },
   { href: "/tables", label: "Egyedi táblák", icon: Table2, countKey: undefined },
   { href: "/activity", label: "Aktivitás", icon: Activity, countKey: undefined },
   { href: "/settings", label: "Beállítások", icon: Settings, countKey: undefined },

@@ -1,32 +1,70 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Monitor, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const emptySubscribe = () => () => {};
-
-function useMounted() {
-  return useSyncExternalStore(emptySubscribe, () => true, () => false);
-}
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckIcon,
+} from "@/components/ui/dropdown-menu";
+import { useHasMounted } from "@/lib/use-has-mounted";
+import { useAutoThemeSchedule, themeForCurrentTime } from "@/lib/use-auto-theme-schedule";
 
 export function ThemeToggle() {
-  const mounted = useMounted();
-  const { resolvedTheme, setTheme } = useTheme();
+  const hasMounted = useHasMounted();
+  const { theme, resolvedTheme, setTheme } = useTheme();
+  const [autoSchedule, setAutoSchedule] = useAutoThemeSchedule();
 
-  if (!mounted) return <Button variant="ghost" size="icon" />;
+  if (!hasMounted) return <Button variant="ghost" size="icon" />;
 
-  const isDark = resolvedTheme === "dark";
+  const TriggerIcon = autoSchedule ? Clock : resolvedTheme === "dark" ? Moon : Sun;
+
+  function choose(mode: "light" | "dark" | "system") {
+    setAutoSchedule(false);
+    setTheme(mode);
+  }
+
+  function chooseAuto() {
+    setAutoSchedule(true);
+    setTheme(themeForCurrentTime());
+  }
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label="Téma váltása"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-    >
-      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label="Téma beállítása">
+          <TriggerIcon className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => choose("light")}>
+          <Sun className="h-4 w-4" /> Világos
+          <span className="ml-auto">
+            <DropdownMenuCheckIcon active={!autoSchedule && theme === "light"} />
+          </span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => choose("dark")}>
+          <Moon className="h-4 w-4" /> Sötét
+          <span className="ml-auto">
+            <DropdownMenuCheckIcon active={!autoSchedule && theme === "dark"} />
+          </span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => choose("system")}>
+          <Monitor className="h-4 w-4" /> Rendszer
+          <span className="ml-auto">
+            <DropdownMenuCheckIcon active={!autoSchedule && theme === "system"} />
+          </span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={chooseAuto}>
+          <Clock className="h-4 w-4" /> Automatikus (6–18 világos)
+          <span className="ml-auto">
+            <DropdownMenuCheckIcon active={autoSchedule} />
+          </span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

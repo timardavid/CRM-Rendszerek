@@ -27,7 +27,7 @@ export async function PATCH(req: Request) {
     userName: session.user.name ?? "Ismeretlen",
     action: "update",
     entityType: "Settings",
-    details: "Márkázási beállítások módosítva",
+    details: "Cégadatok módosítva",
   });
 
   return NextResponse.json({ success: true });

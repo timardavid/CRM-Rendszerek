@@ -20,7 +20,7 @@ beállítások) minden ügyfélnél ugyanaz marad — csak a márkázást és a 
   létrehozásakor. Ez teszi lehetővé, hogy ugyanaz a kód más-más iparágban is használható legyen.
 - **Aktivitás napló** (`ActivityLog`): minden létrehozás/módosítás/törlés/be- és kijelentkezés
   naplózva van, ki és mikor csinálta.
-- **Márkázás** (`Settings` singleton sor): a cég neve mindenhol (böngésző címe, sidebar) innen jön,
+- **Cégadatok** (`Settings` singleton sor): a cég neve mindenhol (böngésző címe, sidebar) innen jön,
   az elsődleges szín (`accentColor`) CSS változóként (`--primary`) van befűzve.
 - **Veszélyzóna**: minden visszavonhatatlan művelet (tábla törlése, profil törlése, saját fiók
   törlése) megerősítő dialógussal, piros kiemeléssel jár.

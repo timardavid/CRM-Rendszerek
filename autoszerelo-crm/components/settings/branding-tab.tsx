@@ -55,7 +55,7 @@ export function BrandingTab({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Márkázás és cégadatok</CardTitle>
+        <CardTitle>Cégadatok</CardTitle>
         <CardDescription>
           A cég neve jelenik meg a CRM címeként mindenhol (böngésző fül, bejelentkezés, oldalsáv). A lenti
           elérhetőségek pedig az árajánlatok és számlák fejlécén jelennek meg.

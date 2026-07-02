@@ -39,7 +39,7 @@ export default async function SettingsPage() {
           <TabsTrigger value="account">Fiók</TabsTrigger>
           <TabsTrigger value="2fa">2FA</TabsTrigger>
           {isAdmin && <TabsTrigger value="team">Csapat</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="branding">Márkázás</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="branding">Cégadatok</TabsTrigger>}
           <TabsTrigger value="calendar">Naptár</TabsTrigger>
           {isAdmin && <TabsTrigger value="export">Export</TabsTrigger>}
           <TabsTrigger value="danger">Veszélyzóna</TabsTrigger>

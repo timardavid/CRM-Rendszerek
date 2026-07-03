@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 import { Mail, Lock, KeyRound } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -67,67 +66,64 @@ export function LoginForm({ google, github }: { google: boolean; github: boolean
   }
 
   return (
-    <Card className="shadow-sm">
-      <CardHeader>
-        <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-          <Lock className="h-5 w-5 text-primary" />
+    <div className="flex flex-col gap-7">
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">Bejelentkezés</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">Add meg a fiókod adatait a folytatáshoz.</p>
+      </div>
+
+      <OAuthButtons google={google} github={github} />
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="email">Email</Label>
+          <div className="relative">
+            <Mail className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="email"
+              type="email"
+              required
+              className="pl-8"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
         </div>
-        <CardTitle>Bejelentkezés</CardTitle>
-        <CardDescription>Add meg a fiókod adatait a folytatáshoz.</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <OAuthButtons google={google} github={github} />
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="password">Jelszó</Label>
+          <div className="relative">
+            <Lock className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="password"
+              type="password"
+              required
+              className="pl-8"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+        </div>
+        {needsTwoFactor && (
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="twoFactorCode">Kétfaktoros kód</Label>
             <div className="relative">
-              <Mail className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <KeyRound className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                id="email"
-                type="email"
-                required
+                id="twoFactorCode"
+                type="text"
+                inputMode="numeric"
+                autoFocus
                 className="pl-8"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={twoFactorCode}
+                onChange={(e) => setTwoFactorCode(e.target.value)}
               />
             </div>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="password">Jelszó</Label>
-            <div className="relative">
-              <Lock className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                id="password"
-                type="password"
-                required
-                className="pl-8"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-          {needsTwoFactor && (
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="twoFactorCode">Kétfaktoros kód</Label>
-              <div className="relative">
-                <KeyRound className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="twoFactorCode"
-                  type="text"
-                  inputMode="numeric"
-                  autoFocus
-                  className="pl-8"
-                  value={twoFactorCode}
-                  onChange={(e) => setTwoFactorCode(e.target.value)}
-                />
-              </div>
-            </div>
-          )}
-          <Button type="submit" disabled={loading} className="mt-1">
-            {loading ? "Bejelentkezés…" : "Bejelentkezés"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        )}
+        <Button type="submit" disabled={loading} className="mt-1">
+          {loading ? "Bejelentkezés…" : "Bejelentkezés"}
+        </Button>
+      </form>
+    </div>
   );
 }

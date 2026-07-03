@@ -46,6 +46,24 @@ npm run build         # prisma generate + production build
 npm run lint
 ```
 
+## Tesztelés
+
+Egy kis Playwright e2e smoke-teszt csomag fedi a kritikus útvonalakat (bejelentkezés
+sikeres/sikertelen esettel, ügyfél CRUD teljes köre). Ez **nem** teljes lefedettség, hanem
+egy induló háló, ami a sablon minden újrafelhasználásakor gyorsan megmutatja, ha valami
+alapvető eltört.
+
+```bash
+npm run test:e2e
+```
+
+Ehhez fusson a dev szerver (`npm run dev` — a teszt parancs magától is elindítja, ha még
+nem fut). A teszt saját, elszigetelt admin fiókot (`qa-e2e@local.test`) és `QA-E2E-` előtagú
+ügyfelet hoz létre a `DATABASE_URL`-ben megadott adatbázisban, majd a végén (`global-teardown`)
+mindent töröl, amit létrehozott — a valódi ügyféladatokhoz nem nyúl. Ha külön teszt-adatbázist
+szeretnél (ajánlott éles használat előtt), hozz létre egy második Neon branch-et, és állítsd a
+`DATABASE_URL`-t arra, mielőtt a tesztet futtatod.
+
 ## OAuth bejelentkezés (Google / GitHub)
 
 Opcionális: a login és regisztráció oldal Google- és GitHub-gombot is mutat, ha a
@@ -67,3 +85,28 @@ ahol az OAuth gomb a jelszavas regisztrációval egyenértékű bootstrap lépé
 Apple Sign-In szándékosan nincs bekötve (fizetős Apple Developer Program + bonyolultabb
 setup szükséges hozzá) — ha mégis kell, a `next-auth/providers/apple` providerrel ugyanígy
 felvehető.
+
+## Biztonsági funkciók
+
+- Jelszó: `bcrypt` hash (cost 12), nincs plaintext jelszó sehol.
+- 2FA: TOTP (`speakeasy`), felhasználónként opcionálisan bekapcsolható.
+- Brute-force védelem: 5 sikertelen próbálkozás után 15 perces fiókzár, admin korábban is
+  feloldhatja (`/settings` → Csapat).
+- RBAC: admin-only műveletek (`lib/authz.ts` → `requireAdmin()`) minden törlésnél és a
+  veszélyzóna funkcióknál.
+- OAuth (Google/GitHub) csak meglévő, email alapján egyező fiókhoz enged bejelentkezést —
+  ismeretlen email nem hoz létre új felhasználót (kivéve az első admin bootstrapnél).
+- Timing-safe összehasonlítás a naptár-feed tokenjénél (`crypto.timingSafeEqual`).
+- CSV export formula-injection védelem (`lib/csv.ts`).
+- Security HTTP headerek (HSTS, X-Frame-Options, X-Content-Type-Options stb.) `next.config.ts`-ben.
+- Atomikus, race condition-mentes admin-bootstrap (`lib/bootstrap.ts`, `$transaction`).
+
+### Ismert korlátok
+
+- A 2FA titkos kulcs (`User.twoFactorSecret`) jelenleg **plaintext** az adatbázisban — nincs
+  alkalmazás-szintű titkosítás rajta (csak a Neon adatbázis-szintű at-rest titkosítása védi).
+  Ha ez szempont, egy AES-256-GCM titkosítás hozzáadható egy szerver oldali kulccsal.
+- Nincs jelszó-visszaállítás ("elfelejtett jelszó") funkció — jelenleg csak admin tud jelszót
+  cserélni egy felhasználónak a Csapat fülön.
+- Az e2e tesztek alapból ugyanazon `DATABASE_URL` ellen futnak, mint a dev szerver (lásd
+  "Tesztelés" fent) — külön teszt-adatbázis nincs alapból bekötve.

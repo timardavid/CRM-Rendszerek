@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/test-results
+/playwright-report
+/e2e/.auth
 
 # local asset drop folder (source files copied into public/ as needed)
 /photos

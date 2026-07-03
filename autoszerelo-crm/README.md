@@ -45,3 +45,25 @@ npm run db:seed       # példa adatok (autószerelő "Járművek" tábla)
 npm run build         # prisma generate + production build
 npm run lint
 ```
+
+## OAuth bejelentkezés (Google / GitHub)
+
+Opcionális: a login és regisztráció oldal Google- és GitHub-gombot is mutat, ha a
+megfelelő env változók be vannak állítva (lásd `.env.example`). Ha egy szolgáltatóhoz
+nincs kitöltve mindkét változó (`CLIENT_ID` + `CLIENT_SECRET`), a hozzá tartozó gomb
+egyszerűen nem jelenik meg — nem kötelező beállítani.
+
+- **Google**: [Google Cloud Console](https://console.cloud.google.com/apis/credentials) →
+  *Create OAuth client ID* → Web application → engedélyezett redirect URI:
+  `{origin}/api/auth/callback/google`
+- **GitHub**: GitHub → *Settings → Developer settings → OAuth Apps → New OAuth App* →
+  Authorization callback URL: `{origin}/api/auth/callback/github`
+
+Biztonsági szabály: OAuth-tal csak **már létező** (email alapján egyező) fiókkal lehet
+bejelentkezni — ismeretlen Google/GitHub email nem hoz létre új felhasználót. Az egyetlen
+kivétel az első admin fiók létrehozása egy még teljesen üres rendszerben (0 felhasználó),
+ahol az OAuth gomb a jelszavas regisztrációval egyenértékű bootstrap lépésként működik.
+
+Apple Sign-In szándékosan nincs bekötve (fizetős Apple Developer Program + bonyolultabb
+setup szükséges hozzá) — ha mégis kell, a `next-auth/providers/apple` providerrel ugyanígy
+felvehető.

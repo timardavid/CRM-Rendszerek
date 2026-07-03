@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# local asset drop folder (source files copied into public/ as needed)
+/photos
+
 # next.js
 /.next/
 /out/

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, SubmitEvent } from "react";
+import { useEffect, useRef, useState, SubmitEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,10 @@ export function RegisterForm({ google, github }: { google: boolean; github: bool
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const companyNameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch("/api/register")
@@ -33,6 +37,12 @@ export function RegisterForm({ google, github }: { google: boolean; github: bool
       toast.error("A gyors regisztráció nem sikerült — lehet, hogy közben már létrejött egy admin fiók.");
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!checking && !setupDone) companyNameRef.current?.focus();
+  }, [checking, setupDone]);
+
+  const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
 
   async function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
@@ -96,39 +106,80 @@ export function RegisterForm({ google, github }: { google: boolean; github: bool
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="companyName">Cég neve</Label>
-          <Input id="companyName" required value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+          <Input
+            id="companyName"
+            ref={companyNameRef}
+            required
+            value={companyName}
+            onChange={(e) => setCompanyName(e.target.value)}
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="name">Neved</Label>
-          <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} />
+          <Input id="name" required autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="password">Jelszó</Label>
-          <Input
-            id="password"
-            type="password"
-            required
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              className="pr-9"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Jelszó elrejtése" : "Jelszó megjelenítése"}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="confirmPassword">Jelszó megerősítése</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            required
-            minLength={8}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
+          <div className="relative">
+            <Input
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              className="pr-9"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              aria-invalid={passwordsMismatch}
+            />
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              aria-label={showConfirmPassword ? "Jelszó elrejtése" : "Jelszó megjelenítése"}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+          {passwordsMismatch && <p className="text-xs text-destructive">A két jelszó nem egyezik.</p>}
         </div>
-        <Button type="submit" disabled={loading} className="mt-1">
+        <Button type="submit" disabled={loading || passwordsMismatch} className="mt-1">
           {loading ? "Létrehozás…" : "Fiók létrehozása"}
         </Button>
       </form>
